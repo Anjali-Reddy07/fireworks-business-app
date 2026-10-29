@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/home/Hero';
@@ -11,11 +11,34 @@ import { ProductDetailModal } from '@/components/catalogue/ProductDetailModal';
 import { InquiryModal } from '@/components/inquiry/InquiryModal';
 import { INITIAL_CATEGORIES, INITIAL_PRODUCTS } from '@/lib/data/sample-products';
 import { Product } from '@/types';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function HomePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [inquiryProduct, setInquiryProduct] = useState<Product | null>(null);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch products from Firestore with fallback to sample products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'fireworks'));
+        const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(fetched.length > 0 ? fetched : INITIAL_PRODUCTS);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching products from Firestore:', err);
+        setError('Notice: Loaded offline catalogue.');
+        setProducts(INITIAL_PRODUCTS);
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleOpenGeneralInquiry = () => {
     setInquiryProduct(null);
@@ -37,17 +60,23 @@ export default function HomePage() {
         <Hero onOpenInquiry={handleOpenGeneralInquiry} />
 
         {/* Product Catalogue Grid */}
-        <ProductGrid
-          products={INITIAL_PRODUCTS}
-          categories={INITIAL_CATEGORIES}
-          onSelectProduct={(p) => setSelectedProduct(p)}
-          onInquireProduct={handleOpenProductInquiry}
-        />
+        {loading ? (
+            <div className="text-center py-8 text-slate-400">Loading products...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-rose-500">{error}</div>
+          ) : (
+            <ProductGrid
+              products={products}
+              categories={INITIAL_CATEGORIES}
+              onSelectProduct={(p) => setSelectedProduct(p)}
+              onInquireProduct={handleOpenProductInquiry}
+            />
+          )}
 
         {/* Green Crackers & Safety Guide */}
         <SafetyGuide />
 
-        {/* Physical Store Locator & Operating Timings */}
+        {/* Seasonal Festive Outlet & Direct Contact */}
         <StoreLocator />
       </main>
 
@@ -61,7 +90,7 @@ export default function HomePage() {
         onInquire={handleOpenProductInquiry}
       />
 
-      {/* Store Visit & Stock Inquiry Booking Modal */}
+      {/* Festive Pre-Booking & Quotation Modal */}
       <InquiryModal
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}

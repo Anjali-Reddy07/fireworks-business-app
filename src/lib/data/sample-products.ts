@@ -1,17 +1,17 @@
 import { BusinessConfig, Category, Product } from '@/types';
 
 export const BUSINESS_CONFIG: BusinessConfig = {
-  name: 'Sri Vijaya Fireworks & Sparklers',
-  tagline: 'Authorized PESO Licensed Green Fireworks Store',
-  address: '142, Sivakasi Main Road, Near Bypass Junction',
-  city: 'Sivakasi',
+  name: 'Sparklers & Smiles',
+  tagline: 'Authorized Seasonal Green Fireworks & Festive Assortments',
+  address: 'Seasonal Festive Outlet, Main Road, Near Bypass Junction',
+  city: 'Sivakasi / Local Outlet',
   state: 'Tamil Nadu',
   pincode: '626123',
-  phone: '+91 98400 12345',
-  whatsapp: '+91 98400 12345',
-  email: 'store@srivijayafireworks.com',
-  operatingHours: 'Monday - Sunday: 8:30 AM - 10:30 PM (Special Festive Timings)',
-  pesoLicense: 'E/SC/TN/24/5129(E8941) Valid Till 2029',
+  phone: '+91 6371512551',
+  whatsapp: '+91 6371512551',
+  email: 'sparklersandsmiles@gmail.com',
+  seasonalOperatingNote: 'Seasonal Festive Counter & Pre-Bookings Open for Festive Season (8:00 AM - 10:30 PM)',
+  pesoLicense: 'E/SC/TN/24/5129(E8941) Seasonal Licensed',
   gstin: '33AAAAA0000A1Z5',
 };
 
@@ -189,7 +189,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     isGreenCracker: true,
     greenCrackerCode: 'NEERI-GC-SKY-881',
     safetyDistanceMeters: 15,
-    imageUrl: 'https://images.unsplash.com/photo-1533230307786-dbd8e788bc11?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=800&q=75',
     active: true,
     featured: true,
     createdAt: '2026-10-01T12:00:00Z',

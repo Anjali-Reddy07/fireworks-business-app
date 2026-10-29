@@ -1,13 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { devStore, isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';
+import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Inquiry, InquiryStatus } from '@/types';
 
 // GET all customer inquiries
 export async function GET() {
   const session = await getAdminSession();
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized. Admin session required.' }, { status: 401 });
+  }
+
+  // Check Firebase Firestore first
+  try {
+    const snapshot = await getDocs(collection(db, 'inquiries'));
+    if (!snapshot.empty) {
+      const inquiries: Inquiry[] = snapshot.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          refId: data.refId || `INQ-${d.id.slice(0, 8).toUpperCase()}`,
+          customerName: data.customerName || 'Customer',
+          phone: data.phone || '',
+          email: data.email || '',
+          festivalDate: data.festivalDate || data.visitDate || '',
+          requirementType: data.requirementType || 'Diwali Festive Family Pack',
+          notes: data.notes || '',
+          status: (data.status as InquiryStatus) || 'Pending',
+          createdAt: data.createdAt || new Date().toISOString(),
+        };
+      });
+      inquiries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return NextResponse.json({ inquiries });
+    }
+  } catch (err) {
+    console.warn('[Firestore GET Inquiries Warning]:', err);
   }
 
   if (isSupabaseConfigured) {
@@ -25,7 +53,7 @@ export async function GET() {
           customerName: d.customer_name,
           phone: d.phone,
           email: d.email,
-          visitDate: d.visit_date,
+          festivalDate: d.visit_date,
           requirementType: d.requirement_type,
           notes: d.notes,
           status: d.status,
@@ -51,6 +79,13 @@ export async function PATCH(req: NextRequest) {
 
     if (!id || !status) {
       return NextResponse.json({ error: 'Inquiry ID and new status are required.' }, { status: 400 });
+    }
+
+    // Update in Firebase Firestore
+    try {
+      await updateDoc(doc(db, 'inquiries', id), { status, updatedAt: new Date().toISOString() });
+    } catch {
+      await setDoc(doc(db, 'inquiries', id), { status, updatedAt: new Date().toISOString() }, { merge: true });
     }
 
     if (isSupabaseConfigured) {

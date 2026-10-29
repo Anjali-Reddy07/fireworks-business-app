@@ -1,13 +1,13 @@
 export type SoundLevel = 'Low / Muffled' | 'Medium' | 'High Thrill' | 'No Sound (Visual Sparkle)';
 
 export type RequirementType = 
-  | 'Diwali / Festive Family Pack'
-  | 'Wedding & Celebration'
+  | 'Diwali Festive Family Pack'
+  | 'Wedding & Celebration Special'
   | 'Temple / Community Festival'
-  | 'Institutional Bulk Purchase'
-  | 'General In-Store Visit';
+  | 'Corporate & Bulk Gift Hampers'
+  | 'Custom Cracker Selection';
 
-export type InquiryStatus = 'Pending' | 'Contacted' | 'Store Visited' | 'Completed' | 'Cancelled';
+export type InquiryStatus = 'Pending' | 'Contacted' | 'Quote Sent' | 'Confirmed' | 'Cancelled';
 
 export interface Category {
   id: string;
@@ -44,7 +44,7 @@ export interface Inquiry {
   customerName: string;
   phone: string;
   email?: string;
-  visitDate: string;
+  festivalDate: string;
   requirementType: RequirementType;
   notes?: string;
   status: InquiryStatus;
@@ -80,7 +80,7 @@ export interface BusinessConfig {
   phone: string;
   whatsapp: string;
   email: string;
-  operatingHours: string;
+  seasonalOperatingNote: string;
   pesoLicense: string;
   gstin: string;
 }

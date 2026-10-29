@@ -47,7 +47,40 @@ export default function AdminLogsPage() {
         </button>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      {/* Mobile Card View (< md) */}
+      <div className="md:hidden space-y-3">
+        {logs.map((log) => (
+          <div key={log.id} className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 shadow-lg text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-[11px] px-2 py-0.5 rounded-md bg-amber-950/80 text-amber-300 border border-amber-500/30 font-semibold">
+                {log.action}
+              </span>
+              <span className="text-[10px] text-slate-500 font-mono">
+                {new Date(log.timestamp).toLocaleDateString('en-IN')}
+              </span>
+            </div>
+            <p className="text-slate-200 text-xs leading-relaxed">{log.details}</p>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[11px] text-slate-400">
+              <span className="inline-flex items-center gap-1">
+                <User className="w-3 h-3 text-slate-500" />
+                <span>{log.adminUser}</span>
+              </span>
+              <span className="text-slate-500 text-[10px]">
+                {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          </div>
+        ))}
+
+        {logs.length === 0 && (
+          <div className="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-xs text-slate-500">
+            No activity logs recorded.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View (md+) */}
+      <div className="hidden md:block bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase font-semibold">

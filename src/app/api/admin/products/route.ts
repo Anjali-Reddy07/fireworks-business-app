@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sendAdminEmail, productEmailHtml } from '@/lib/email';
 import { getAdminSession } from '@/lib/auth';
 import { devStore, isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';
+import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Product } from '@/types';
 
 // GET all products
@@ -8,6 +11,20 @@ export async function GET() {
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized. Admin session required.' }, { status: 401 });
+  }
+
+  // Try fetching from Firebase Firestore first
+  try {
+    const snapshot = await getDocs(collection(db, 'fireworks'));
+    if (!snapshot.empty) {
+      const firestoreProducts = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as Product[];
+      return NextResponse.json({ products: firestoreProducts });
+    }
+  } catch (firestoreErr) {
+    console.warn('[Firestore Get Products Warning]:', firestoreErr);
   }
 
   if (isSupabaseConfigured) {
@@ -109,7 +126,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Also save to Firebase Firestore
+    try {
+      const sanitized = Object.fromEntries(
+        Object.entries(newProd).filter(([, v]) => v !== undefined)
+      );
+      await setDoc(doc(db, 'fireworks', newProd.id), sanitized);
+    } catch (fsErr) {
+      console.warn('[Firestore Add Product Warning]:', fsErr);
+    }
+
     const saved = devStore.saveProduct(newProd);
+    // Send email notification for new product
+    await sendAdminEmail('New Product Added', productEmailHtml(newProd, 'created'));
     return NextResponse.json({ success: true, product: saved });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Error creating product';
@@ -157,7 +186,19 @@ export async function PUT(req: NextRequest) {
       }
     }
 
+    // Also update in Firebase Firestore
+    try {
+      const sanitized = Object.fromEntries(
+        Object.entries(productData).filter(([, v]) => v !== undefined)
+      );
+      await setDoc(doc(db, 'fireworks', productData.id), sanitized, { merge: true });
+    } catch (fsErr) {
+      console.warn('[Firestore Update Product Warning]:', fsErr);
+    }
+
     const updated = devStore.saveProduct(productData);
+    // Send email notification for product update
+    await sendAdminEmail('Product Updated', productEmailHtml(productData, 'updated'));
     return NextResponse.json({ success: true, product: updated });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Error updating product';
@@ -185,6 +226,13 @@ export async function DELETE(req: NextRequest) {
       if (adminClient) {
         await adminClient.from('products').delete().eq('id', id);
       }
+    }
+
+    // Also delete from Firebase Firestore
+    try {
+      await deleteDoc(doc(db, 'fireworks', id));
+    } catch (fsErr) {
+      console.warn('[Firestore Delete Product Warning]:', fsErr);
     }
 
     const success = devStore.deleteProduct(id);

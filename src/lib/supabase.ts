@@ -34,8 +34,8 @@ class DevStore {
       customerName: 'Rajesh Kumar',
       phone: '+91 98765 43210',
       email: 'rajesh.k@gmail.com',
-      visitDate: '2026-11-02',
-      requirementType: 'Diwali / Festive Family Pack',
+      festivalDate: '2026-11-02',
+      requirementType: 'Diwali Festive Family Pack',
       notes: 'Looking for child-safe green sparklers and family assortment box.',
       status: 'Contacted',
       createdAt: '2026-10-25T14:30:00Z',
@@ -45,9 +45,9 @@ class DevStore {
       refId: 'INQ-2026-3829',
       customerName: 'Meenakshi Sundaram',
       phone: '+91 94431 87654',
-      visitDate: '2026-11-05',
-      requirementType: 'Wedding & Celebration',
-      notes: 'Require 12-shot aerial repeater cakes and golden anars for wedding reception.',
+      festivalDate: '2026-11-05',
+      requirementType: 'Wedding & Celebration Special',
+      notes: 'Require 12-shot aerial repeater cakes and golden anars for wedding celebration.',
       status: 'Pending',
       createdAt: '2026-10-27T09:15:00Z',
     },
@@ -70,7 +70,7 @@ class DevStore {
       type: 'sale_in_store',
       quantityChange: -5,
       newStockCount: 35,
-      reason: 'Walk-in retail customer billing',
+      reason: 'Seasonal festive customer dispatch',
       createdAt: '2026-10-26T16:45:00Z',
     },
   ];
@@ -78,7 +78,7 @@ class DevStore {
     {
       id: 'log-001',
       action: 'SYSTEM_INIT',
-      details: 'Application database initialized with 11 certified products and 6 categories',
+      details: 'Sparklers & Smiles festive database initialized with 11 certified products',
       adminUser: 'System Administrator',
       timestamp: '2026-10-27T20:30:00Z',
     },
@@ -164,7 +164,7 @@ class DevStore {
       createdAt: new Date().toISOString(),
     };
     this.inquiries.unshift(newInquiry);
-    this.addLog('INQUIRY_RECEIVED', `Store visit inquiry #${newInquiry.refId} received from ${newInquiry.customerName} (${newInquiry.phone}).`);
+    this.addLog('INQUIRY_RECEIVED', `Seasonal festive inquiry #${newInquiry.refId} received from ${newInquiry.customerName} (${newInquiry.phone}).`);
     return newInquiry;
   }
 

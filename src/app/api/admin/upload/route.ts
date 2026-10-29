@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
-import { isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(req: NextRequest) {
   const session = await getAdminSession();
@@ -21,7 +20,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No image file provided.' }, { status: 400 });
     }
 
-    // Validate MIME type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         { error: 'Invalid file format. Only JPEG, PNG, and WebP images are allowed.' },
@@ -29,10 +27,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate file size
     if (file.size > MAX_SIZE_BYTES) {
       return NextResponse.json(
-        { error: 'File size exceeds maximum permitted limit of 5MB.' },
+        { error: 'File size exceeds maximum permitted limit of 10MB.' },
         { status: 400 }
       );
     }
@@ -40,50 +37,27 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Unique filename
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const cleanName = file.name.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 20);
-    const uniqueFileName = `fw_${Date.now()}_${cleanName}.${ext}`;
+    // Keep clean, recognizable filename
+    const ext = path.extname(file.name) || '.jpg';
+    const baseName = path.basename(file.name, ext).replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+    const safeFileName = `${baseName || 'item'}_${Date.now()}${ext.toLowerCase()}`;
 
-    // 1. If Supabase is configured, upload to Supabase Storage bucket 'fireworks-products'
-    if (isSupabaseConfigured) {
-      const adminClient = getAdminSupabase();
-      if (adminClient) {
-        const { error: uploadError } = await adminClient.storage
-          .from('fireworks-products')
-          .upload(uniqueFileName, buffer, {
-            contentType: file.type,
-            upsert: false,
-          });
+    // 1. Save to root products_img/
+    const rootUploadDir = path.join(process.cwd(), 'products_img');
+    await mkdir(rootUploadDir, { recursive: true });
+    await writeFile(path.join(rootUploadDir, safeFileName), buffer);
 
-        if (!uploadError) {
-          const { data: publicUrlData } = adminClient.storage
-            .from('fireworks-products')
-            .getPublicUrl(uniqueFileName);
+    // 2. Save to public/products_img/ for Next.js web serving
+    const publicUploadDir = path.join(process.cwd(), 'public', 'products_img');
+    await mkdir(publicUploadDir, { recursive: true });
+    await writeFile(path.join(publicUploadDir, safeFileName), buffer);
 
-          return NextResponse.json({
-            success: true,
-            imageUrl: publicUrlData.publicUrl,
-            storagePath: uniqueFileName,
-          });
-        } else {
-          console.warn('[Supabase Storage Warning]: Falling back to local upload.', uploadError);
-        }
-      }
-    }
-
-    // 2. Local public storage fallback
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadDir, { recursive: true });
-    const localFilePath = path.join(uploadDir, uniqueFileName);
-    await writeFile(localFilePath, buffer);
-
-    const localUrl = `/uploads/${uniqueFileName}`;
+    const imageUrl = `/products_img/${encodeURIComponent(safeFileName)}`;
 
     return NextResponse.json({
       success: true,
-      imageUrl: localUrl,
-      storagePath: uniqueFileName,
+      imageUrl,
+      filename: safeFileName,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Error uploading image';

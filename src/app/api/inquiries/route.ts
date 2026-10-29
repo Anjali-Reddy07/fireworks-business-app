@@ -6,7 +6,10 @@ import { RequirementType } from '@/types';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { customerName, phone, email, visitDate, requirementType, notes, productName } = body;
+    const { customerName, phone, email, festivalDate, visitDate, requirementType, notes, productName } = body;
+
+    // Support both festivalDate and legacy visitDate
+    const actualDate = festivalDate || visitDate;
 
     // Server-side validation
     if (!customerName || typeof customerName !== 'string' || customerName.trim().length < 2) {
@@ -18,16 +21,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'A valid 10-digit phone number is required.' }, { status: 400 });
     }
 
-    if (!visitDate) {
-      return NextResponse.json({ error: 'Estimated store visit date is required.' }, { status: 400 });
+    if (!actualDate) {
+      return NextResponse.json({ error: 'Estimated festival / celebration date is required.' }, { status: 400 });
     }
 
     const inquiryPayload = {
       customerName: customerName.trim(),
       phone: `+91 ${cleanPhone.slice(-10)}`,
       email: email ? String(email).trim() : undefined,
-      visitDate: String(visitDate),
-      requirementType: (requirementType as RequirementType) || 'General In-Store Visit',
+      festivalDate: String(actualDate),
+      requirementType: (requirementType as RequirementType) || 'Diwali Festive Family Pack',
       notes: notes ? String(notes).trim() : productName ? `Inquiring for product: ${productName}` : undefined,
     };
 
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
             customer_name: inquiryPayload.customerName,
             phone: inquiryPayload.phone,
             email: inquiryPayload.email,
-            visit_date: inquiryPayload.visitDate,
+            visit_date: inquiryPayload.festivalDate, // stored in visit_date column in Supabase
             requirement_type: inquiryPayload.requirementType,
             notes: inquiryPayload.notes,
             status: 'Pending',
@@ -57,7 +60,6 @@ export async function POST(req: NextRequest) {
 
         if (error) {
           console.error('[Supabase Insert Inquiry Error]:', error);
-          // Fallback to devStore on db error to prevent customer loss
           createdInquiry = devStore.saveInquiry(inquiryPayload);
         } else {
           createdInquiry = {
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
             customerName: data.customer_name,
             phone: data.phone,
             email: data.email,
-            visitDate: data.visit_date,
+            festivalDate: data.visit_date,
             requirementType: data.requirement_type,
             notes: data.notes,
             status: data.status,
@@ -77,12 +79,10 @@ export async function POST(req: NextRequest) {
         createdInquiry = devStore.saveInquiry(inquiryPayload);
       }
     } else {
-      // Dev store
       createdInquiry = devStore.saveInquiry(inquiryPayload);
     }
 
-    // Dispatch WhatsApp mobile notification asynchronously
-    // Does not fail the user transaction if WhatsApp API network times out
+    // Dispatch WhatsApp mobile notification to owner asynchronously
     sendInquiryNotification(createdInquiry).catch((notifError) => {
       console.error('[Background Notification Error]:', notifError);
     });

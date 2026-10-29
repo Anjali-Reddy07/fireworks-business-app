@@ -199,81 +199,136 @@ export default function AdminInventoryPage() {
       </div>
 
       {/* Two Column Layout: Current Stock Table & Movement History */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Current Stock Levels with Quick +/- */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <h3 className="font-bold text-white text-sm">Current Counter Inventory</h3>
-            <span className="text-xs text-slate-400">{products.length} Products Tracked</span>
-          </div>
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="p-3.5 sm:p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-xs sm:text-sm">Current Counter Inventory</h3>
+              <span className="text-[11px] sm:text-xs text-slate-400">{products.length} Products Tracked</span>
+            </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase font-semibold">
-                <tr>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Balance</th>
-                  <th className="px-4 py-3 text-right">Quick Stock Counter</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {products.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3">
-                      <span className="font-bold text-white block line-clamp-1">{p.name}</span>
-                      <span className="text-slate-400 text-[11px]">₹{p.retailPrice} / box</span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-300">{p.categoryName}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`font-mono font-bold px-2 py-0.5 rounded-md ${
-                          p.stockQuantity <= 15
-                            ? 'bg-rose-950 text-rose-400 border border-rose-500/30'
-                            : 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
-                        }`}
+            {/* Mobile View (< md) */}
+            <div className="md:hidden divide-y divide-slate-800 p-2">
+              {products.map((p) => (
+                <div key={p.id} className="p-3 space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="font-bold text-white text-xs sm:text-sm block line-clamp-1">{p.name}</span>
+                      <span className="text-slate-400 text-[11px] block">{p.categoryName} • ₹{p.retailPrice}/box</span>
+                    </div>
+                    <span
+                      className={`font-mono font-bold text-xs px-2 py-0.5 rounded-md shrink-0 ${
+                        p.stockQuantity <= 15
+                          ? 'bg-rose-950 text-rose-400 border border-rose-500/30'
+                          : 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
+                      }`}
+                    >
+                      {p.stockQuantity} Boxes
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-1 pt-1 border-t border-slate-800/60">
+                    <span className="text-[10px] text-slate-500 uppercase font-semibold">Quick Action:</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleQuickInlineAdjust(p.id, -1, 'Quick retail counter sale')}
+                        disabled={p.stockQuantity <= 0}
+                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold border border-slate-700 text-xs cursor-pointer disabled:opacity-30"
+                        title="Record 1 Box Sold"
                       >
-                        {p.stockQuantity} Boxes
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => handleQuickInlineAdjust(p.id, -1, 'Quick retail counter sale')}
-                          disabled={p.stockQuantity <= 0}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold border border-slate-700 cursor-pointer disabled:opacity-30"
-                          title="Record 1 Box Sold"
-                        >
-                          -1
-                        </button>
-                        <button
-                          onClick={() => handleQuickInlineAdjust(p.id, -5, 'Bulk customer walk-in sale')}
-                          disabled={p.stockQuantity < 5}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold border border-slate-700 cursor-pointer disabled:opacity-30"
-                          title="Record 5 Boxes Sold"
-                        >
-                          -5
-                        </button>
-                        <button
-                          onClick={() => handleQuickInlineAdjust(p.id, 10, 'Counter restocked from warehouse')}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold border border-slate-700 cursor-pointer"
-                          title="Restock 10 Boxes"
-                        >
-                          +10
-                        </button>
-                        <button
-                          onClick={() => handleQuickInlineAdjust(p.id, 50, 'Factory carton unpacked')}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold border border-slate-700 cursor-pointer"
-                          title="Restock 50 Boxes"
-                        >
-                          +50
-                        </button>
-                      </div>
-                    </td>
+                        -1
+                      </button>
+                      <button
+                        onClick={() => handleQuickInlineAdjust(p.id, -5, 'Bulk customer walk-in sale')}
+                        disabled={p.stockQuantity < 5}
+                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold border border-slate-700 text-xs cursor-pointer disabled:opacity-30"
+                        title="Record 5 Boxes Sold"
+                      >
+                        -5
+                      </button>
+                      <button
+                        onClick={() => handleQuickInlineAdjust(p.id, 10, 'Counter restocked from warehouse')}
+                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold border border-slate-700 text-xs cursor-pointer"
+                        title="Restock 10 Boxes"
+                      >
+                        +10
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (md+) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase font-semibold">
+                  <tr>
+                    <th className="px-4 py-3">Product</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3">Balance</th>
+                    <th className="px-4 py-3 text-right">Quick Stock Counter</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {products.map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="px-4 py-3">
+                        <span className="font-bold text-white block line-clamp-1">{p.name}</span>
+                        <span className="text-slate-400 text-[11px]">₹{p.retailPrice} / box</span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-300">{p.categoryName}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`font-mono font-bold px-2 py-0.5 rounded-md ${
+                            p.stockQuantity <= 15
+                              ? 'bg-rose-950 text-rose-400 border border-rose-500/30'
+                              : 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
+                          }`}
+                        >
+                          {p.stockQuantity} Boxes
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleQuickInlineAdjust(p.id, -1, 'Quick retail counter sale')}
+                            disabled={p.stockQuantity <= 0}
+                            className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold border border-slate-700 cursor-pointer disabled:opacity-30"
+                            title="Record 1 Box Sold"
+                          >
+                            -1
+                          </button>
+                          <button
+                            onClick={() => handleQuickInlineAdjust(p.id, -5, 'Bulk customer walk-in sale')}
+                            disabled={p.stockQuantity < 5}
+                            className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold border border-slate-700 cursor-pointer disabled:opacity-30"
+                            title="Record 5 Boxes Sold"
+                          >
+                            -5
+                          </button>
+                          <button
+                            onClick={() => handleQuickInlineAdjust(p.id, 10, 'Counter restocked from warehouse')}
+                            className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold border border-slate-700 cursor-pointer"
+                            title="Restock 10 Boxes"
+                          >
+                            +10
+                          </button>
+                          <button
+                            onClick={() => handleQuickInlineAdjust(p.id, 50, 'Factory carton unpacked')}
+                            className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold border border-slate-700 cursor-pointer"
+                            title="Restock 50 Boxes"
+                          >
+                            +50
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

@@ -9,34 +9,32 @@ export interface NotificationResult {
 }
 
 /**
- * Sends a notification alert to the business owner when a new permitted customer inquiry is received.
- * Adheres strictly to Indian business inquiry compliance (informational store-visit / bulk booking).
+ * Sends a notification alert to the business owner when a new seasonal festive inquiry / pre-booking is received.
  */
 export async function sendInquiryNotification(inquiry: Inquiry): Promise<NotificationResult> {
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const ownerPhone = process.env.BUSINESS_OWNER_PHONE;
+  const ownerPhone = process.env.BUSINESS_OWNER_PHONE || '+916371512551';
 
   const now = new Date().toISOString();
 
   // Notification text formatted for instant WhatsApp reading
   const messageBody = 
-`🎆 *NEW FIREWORKS STORE INQUIRY*
+`🎆 *SPARKLERS & SMILES - NEW FESTIVE INQUIRY*
 ━━━━━━━━━━━━━━━━━━━━
 *Ref ID:* #${inquiry.refId}
 *Customer:* ${inquiry.customerName}
 *Phone:* ${inquiry.phone}
-*Visit Date:* ${inquiry.visitDate}
-*Purpose:* ${inquiry.requirementType}
-${inquiry.notes ? `*Notes:* ${inquiry.notes}` : ''}
+*Occasion/Festival Date:* ${inquiry.festivalDate}
+*Requirement:* ${inquiry.requirementType}
+${inquiry.notes ? `*Cracker List/Notes:* ${inquiry.notes}` : ''}
 *Received At:* ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 ━━━━━━━━━━━━━━━━━━━━
-_Action: Please review on Admin Dashboard or contact customer to confirm store visit._`;
+_Action: Please review on Admin Portal or reply to customer via WhatsApp._`;
 
   // If WhatsApp Business credentials are provided, dispatch via Meta Graph API
   if (token && phoneNumberId && ownerPhone) {
     try {
-      // Clean phone number: remove '+' or spaces
       const cleanedOwnerPhone = ownerPhone.replace(/[^\d]/g, '');
 
       const response = await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
@@ -89,7 +87,7 @@ _Action: Please review on Admin Dashboard or contact customer to confirm store v
 
   // Safe Development Fallback: Logs clearly to terminal and server console
   console.log(`\n======================================================`);
-  console.log(`[DEV NOTIFICATION ENGINE] Simulated WhatsApp to Owner (${ownerPhone || 'Not Set'}):`);
+  console.log(`[WHATSAPP ALERT] Simulated Alert to Owner (${ownerPhone}):`);
   console.log(messageBody);
   console.log(`======================================================\n`);
 
