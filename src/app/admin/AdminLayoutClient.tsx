@@ -99,10 +99,11 @@ export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
               <Link
                 href="/"
                 target="_blank"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-slate-800/60 px-3 py-1.5 rounded-lg border border-slate-700/60 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-xl border border-amber-500/30 transition-colors"
+                title="Open public buyer storefront in new tab"
               >
-                <span>Storefront</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
+                <span>View Buyer Store</span>
+                <ExternalLink className="w-3 h-3 text-amber-400" />
               </Link>
 
               <button

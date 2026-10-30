@@ -70,3 +70,4 @@ export async function GET() {
   // Fallback to sample users
   return NextResponse.json({ users: SAMPLE_USERS, total: SAMPLE_USERS.length });
 }
+
