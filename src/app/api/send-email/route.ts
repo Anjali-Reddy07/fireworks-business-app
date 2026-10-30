@@ -15,10 +15,14 @@ import {
 } from '@/lib/email';
 import { BUSINESS_CONFIG } from '@/lib/data/sample-products';
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const resend = new Resend(RESEND_API_KEY);
 const DEFAULT_FROM = 'Fireworks Store <onboarding@resend.dev>';
 const ADMIN_EMAIL = 'kanjalireddy29@gmail.com';
+
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
+}
 
 /**
  * Generates festive HTML email for the customer order confirmation
@@ -301,29 +305,41 @@ export async function POST(req: NextRequest) {
         adminEmailSent: false,
       };
 
-      // 1. Send customer confirmation email using Resend
-      try {
-        const custRes = await resend.emails.send({
-          from: DEFAULT_FROM,
-          to: customerEmail.trim(),
-          subject: `✨ Festive Order Confirmation [${orderId}] - Fireworks Store`,
-          html: customerHtml,
-        });
+      const resend = getResendClient();
 
-        if (custRes.error) {
-          console.warn('[Resend Customer Email Notice]:', custRes.error);
-          emailResults.customerError = custRes.error.message;
-          // Fallback via SMTP if unverified testing domain limitation
+      // 1. Send customer confirmation email using Resend (or SMTP fallback)
+      try {
+        if (resend) {
+          const custRes = await resend.emails.send({
+            from: DEFAULT_FROM,
+            to: customerEmail.trim(),
+            subject: `✨ Festive Order Confirmation [${orderId}] - Fireworks Store`,
+            html: customerHtml,
+          });
+
+          if (custRes.error) {
+            console.warn('[Resend Customer Email Notice]:', custRes.error);
+            emailResults.customerError = custRes.error.message;
+            // Fallback via SMTP if unverified testing domain limitation
+            const smtpOk = await sendCustomerEmail(
+              customerEmail.trim(),
+              `✨ Festive Order Confirmation [${orderId}] - Fireworks Store`,
+              customerHtml
+            );
+            emailResults.customerEmailSent = smtpOk;
+          } else {
+            emailResults.customerEmailSent = true;
+            emailResults.customerEmailId = custRes.data?.id;
+            console.log(`✅ Resend customer email delivered: ${custRes.data?.id}`);
+          }
+        } else {
+          // Send directly via SMTP if no Resend key configured
           const smtpOk = await sendCustomerEmail(
             customerEmail.trim(),
             `✨ Festive Order Confirmation [${orderId}] - Fireworks Store`,
             customerHtml
           );
           emailResults.customerEmailSent = smtpOk;
-        } else {
-          emailResults.customerEmailSent = true;
-          emailResults.customerEmailId = custRes.data?.id;
-          console.log(`✅ Resend customer email delivered: ${custRes.data?.id}`);
         }
       } catch (err: any) {
         console.error('[Resend Customer Send Error]:', err);
@@ -340,26 +356,34 @@ export async function POST(req: NextRequest) {
       // 2. Send admin alert email to kanjalireddy29@gmail.com
       try {
         const total = orderDetails?.total || (typeof orderDetails === 'number' ? orderDetails : 0);
-        const adminRes = await resend.emails.send({
-          from: DEFAULT_FROM,
-          to: ADMIN_EMAIL,
-          subject: `🚨 New Order Alert: ${orderId} - ₹${total} (${customerName})`,
-          html: adminHtml,
-        });
+        if (resend) {
+          const adminRes = await resend.emails.send({
+            from: DEFAULT_FROM,
+            to: ADMIN_EMAIL,
+            subject: `🚨 New Order Alert: ${orderId} - ₹${total} (${customerName})`,
+            html: adminHtml,
+          });
 
-        if (adminRes.error) {
-          console.warn('[Resend Admin Email Notice]:', adminRes.error);
-          emailResults.adminError = adminRes.error.message;
-          // Fallback to SMTP
+          if (adminRes.error) {
+            console.warn('[Resend Admin Email Notice]:', adminRes.error);
+            emailResults.adminError = adminRes.error.message;
+            // Fallback to SMTP
+            const smtpOk = await sendAdminEmail(
+              `🚨 New Order Alert: ${orderId} - ₹${total} (${customerName})`,
+              adminHtml
+            );
+            emailResults.adminEmailSent = smtpOk;
+          } else {
+            emailResults.adminEmailSent = true;
+            emailResults.adminEmailId = adminRes.data?.id;
+            console.log(`✅ Resend admin email delivered: ${adminRes.data?.id}`);
+          }
+        } else {
           const smtpOk = await sendAdminEmail(
             `🚨 New Order Alert: ${orderId} - ₹${total} (${customerName})`,
             adminHtml
           );
           emailResults.adminEmailSent = smtpOk;
-        } else {
-          emailResults.adminEmailSent = true;
-          emailResults.adminEmailId = adminRes.data?.id;
-          console.log(`✅ Resend admin email delivered: ${adminRes.data?.id}`);
         }
       } catch (err: any) {
         console.error('[Resend Admin Send Error]:', err);
