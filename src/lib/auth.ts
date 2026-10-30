@@ -1,4 +1,6 @@
 import { cookies } from 'next/headers';
+import { collection, doc, getDoc, getDocs, setDoc, query, where, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const ADMIN_COOKIE_NAME = 'fireworks_admin_session';
 
@@ -6,10 +8,16 @@ export interface AdminUser {
   id: string;
   username: string;
   email: string;
+  role?: string;
+  isAdmin?: boolean;
   createdAt: string;
 }
 
-// ─── In-Memory Admin Account Store ─────────────────────────────────────────
+function hashPassword(password: string): string {
+  return Buffer.from(password + ':fireworks_admin_salt_v2').toString('base64');
+}
+
+// ─── In-Memory Admin Account Store (Fallback) ──────────────────────────────
 
 class AdminStore {
   private admins: (AdminUser & { passwordHash: string })[] = [
@@ -17,14 +25,12 @@ class AdminStore {
       id: 'admin-master',
       username: 'admin',
       email: 'admin@sparklersandsmiles.com',
-      passwordHash: Buffer.from('password123:fireworks_admin_salt_v2').toString('base64'),
+      role: 'admin',
+      isAdmin: true,
+      passwordHash: hashPassword('password123'),
       createdAt: new Date().toISOString(),
     },
   ];
-
-  private hashPassword(password: string): string {
-    return Buffer.from(password + ':fireworks_admin_salt_v2').toString('base64');
-  }
 
   findByUsername(username: string) {
     return this.admins.find(
@@ -50,7 +56,6 @@ class AdminStore {
     return this.admins.map(({ passwordHash: _, ...safe }) => safe);
   }
 
-  /** First-time setup OR invite a new admin by an existing admin. */
   register(
     username: string,
     email: string,
@@ -61,7 +66,9 @@ class AdminStore {
       id: `admin-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       username: username.trim(),
       email: email.toLowerCase().trim(),
-      passwordHash: this.hashPassword(password),
+      role: 'admin',
+      isAdmin: true,
+      passwordHash: hashPassword(password),
       createdAt: new Date().toISOString(),
     };
     this.admins.push(newAdmin);
@@ -69,7 +76,6 @@ class AdminStore {
     return safe;
   }
 
-  /** Update username / email (skip field if undefined). */
   update(
     id: string,
     fields: { username?: string; email?: string; password?: string }
@@ -78,28 +84,16 @@ class AdminStore {
     if (idx === -1) return null;
 
     const admin = this.admins[idx];
-
-    if (fields.username) {
-      const conflict = this.findByUsername(fields.username);
-      if (conflict && conflict.id !== id) return null; // username taken
-      admin.username = fields.username.trim();
-    }
-    if (fields.email) {
-      const conflict = this.findByEmail(fields.email);
-      if (conflict && conflict.id !== id) return null; // email taken
-      admin.email = fields.email.toLowerCase().trim();
-    }
-    if (fields.password) {
-      admin.passwordHash = this.hashPassword(fields.password);
-    }
+    if (fields.username) admin.username = fields.username.trim();
+    if (fields.email) admin.email = fields.email.toLowerCase().trim();
+    if (fields.password) admin.passwordHash = hashPassword(fields.password);
 
     const { passwordHash: _, ...safe } = admin;
     return safe;
   }
 
-  /** Delete an admin by id. Returns false if last admin or not found. */
   delete(id: string): boolean {
-    if (this.admins.length <= 1) return false; // cannot delete the only admin
+    if (this.admins.length <= 1) return false;
     const idx = this.admins.findIndex((a) => a.id === id);
     if (idx === -1) return false;
     this.admins.splice(idx, 1);
@@ -109,7 +103,7 @@ class AdminStore {
   verifyPassword(username: string, password: string): AdminUser | null {
     const admin = this.findByUsername(username);
     if (!admin) return null;
-    if (admin.passwordHash !== this.hashPassword(password)) return null;
+    if (admin.passwordHash !== hashPassword(password)) return null;
     const { passwordHash: _, ...safe } = admin;
     return safe;
   }
@@ -130,6 +124,7 @@ function generateSessionToken(admin: AdminUser): string {
     user: admin.username,
     email: admin.email,
     role: 'administrator',
+    isAdmin: true,
     issuedAt: Date.now(),
   });
   return Buffer.from(payload).toString('base64');
@@ -157,19 +152,78 @@ export async function getAdminSession() {
   return parseSessionToken(token);
 }
 
+/**
+ * Register a new Admin in Firebase DB `admins` & `users` collections
+ */
 export async function registerAdmin(
   username: string,
   email: string,
   password: string
 ): Promise<{ success: boolean; error?: string; admin?: AdminUser }> {
-  const admin = adminStore.register(username, email, password);
-  if (!admin) {
-    return {
-      success: false,
-      error: 'An admin account with that username or email already exists.',
-    };
+  const normalizedUsername = username.trim();
+  const normalizedEmail = email.trim().toLowerCase();
+  const pwdHash = hashPassword(password);
+  const adminId = `admin-${Date.now()}`;
+
+  // 1. Check Firebase Firestore for existing admin
+  try {
+    const q1 = query(collection(db, 'admins'), where('username', '==', normalizedUsername));
+    const snap1 = await getDocs(q1);
+    if (!snap1.empty) {
+      return { success: false, error: 'An administrator with that username already exists.' };
+    }
+  } catch (fsErr) {
+    console.warn('[Firestore Admin Check Warning]:', fsErr);
   }
-  const token = generateSessionToken(admin);
+
+  const newAdminRecord: AdminUser & { passwordHash: string } = {
+    id: adminId,
+    username: normalizedUsername,
+    email: normalizedEmail,
+    role: 'admin',
+    isAdmin: true,
+    passwordHash: pwdHash,
+    createdAt: new Date().toISOString(),
+  };
+
+  // 2. Save directly to Firebase DB `admins` collection
+  try {
+    await setDoc(doc(db, 'admins', adminId), newAdminRecord);
+    console.log(`✅ Admin ${normalizedUsername} saved to Firebase DB 'admins' collection!`);
+  } catch (err) {
+    console.error('Failed to save admin to Firebase DB:', err);
+  }
+
+  // 3. Also save to Firebase DB `users` collection with role: 'admin' and isAdmin: true
+  try {
+    await setDoc(doc(db, 'users', adminId), {
+      id: adminId,
+      name: `${normalizedUsername} (Store Admin)`,
+      username: normalizedUsername,
+      email: normalizedEmail,
+      phone: '+91 6371512551',
+      role: 'admin',
+      isAdmin: true,
+      createdAt: newAdminRecord.createdAt,
+    });
+    console.log(`✅ Admin also saved to Firebase DB 'users' collection with role: admin!`);
+  } catch (err) {
+    console.warn('[Firestore User Table Admin Insert]:', err);
+  }
+
+  // 4. Update memory store
+  adminStore.register(normalizedUsername, normalizedEmail, password);
+
+  const safeAdmin: AdminUser = {
+    id: adminId,
+    username: normalizedUsername,
+    email: normalizedEmail,
+    role: 'admin',
+    isAdmin: true,
+    createdAt: newAdminRecord.createdAt,
+  };
+
+  const token = generateSessionToken(safeAdmin);
   const cookieStore = await cookies();
   cookieStore.set(ADMIN_COOKIE_NAME, token, {
     httpOnly: true,
@@ -178,16 +232,50 @@ export async function registerAdmin(
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });
-  return { success: true, admin };
+
+  return { success: true, admin: safeAdmin };
 }
 
+/**
+ * Log in Admin with Firebase DB check
+ */
 export async function loginAdmin(
   username: string,
   password: string
 ): Promise<boolean> {
-  const admin = adminStore.verifyPassword(username, password);
-  if (!admin) return false;
-  const token = generateSessionToken(admin);
+  const normalizedUsername = username.trim();
+  const inputHash = hashPassword(password);
+  let matchedAdmin: AdminUser | null = null;
+
+  // 1. Verify in Firebase DB `admins` collection first
+  try {
+    const q = query(collection(db, 'admins'), where('username', '==', normalizedUsername));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      const docData = snap.docs[0].data();
+      if (docData.passwordHash === inputHash) {
+        matchedAdmin = {
+          id: snap.docs[0].id,
+          username: docData.username,
+          email: docData.email,
+          role: 'admin',
+          isAdmin: true,
+          createdAt: docData.createdAt || new Date().toISOString(),
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[Firestore Admin Login Query Warning]:', err);
+  }
+
+  // 2. Fallback to in-memory store if Firestore offline or not found
+  if (!matchedAdmin) {
+    matchedAdmin = adminStore.verifyPassword(normalizedUsername, password);
+  }
+
+  if (!matchedAdmin) return false;
+
+  const token = generateSessionToken(matchedAdmin);
   const cookieStore = await cookies();
   cookieStore.set(ADMIN_COOKIE_NAME, token, {
     httpOnly: true,
@@ -196,6 +284,7 @@ export async function loginAdmin(
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
   });
+
   return true;
 }
 

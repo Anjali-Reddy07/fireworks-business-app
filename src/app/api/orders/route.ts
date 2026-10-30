@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendAdminEmail, orderEmailHtml } from '@/lib/email';
+import { 
+  sendAdminEmail, 
+  sendCustomerEmail, 
+  orderEmailHtml, 
+  customerOrderConfirmationEmailHtml 
+} from '@/lib/email';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -83,6 +88,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
+      orderId: clientOrderId,
       customerName,
       customerEmail,
       customerPhone,
@@ -97,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
-    const orderId = `ORD-2026-${randomDigits}`;
+    const orderId = clientOrderId || `ORD-2026-${randomDigits}`;
 
     const newOrder: OrderRecord = {
       id: orderId,
@@ -119,30 +125,69 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to Firebase Firestore
+    // 1. Save to Firebase Firestore `orders` collection
     try {
-      const sanitized = Object.fromEntries(
-        Object.entries(newOrder).filter(([, v]) => v !== undefined)
-      );
-      await setDoc(doc(db, 'orders', orderId), sanitized);
-    } catch (fsErr) {
-      console.warn('[Firestore Order Insert Warning]:', fsErr);
-    }
-
-    // Also update in-memory
-    inMemoryOrders.unshift(newOrder);
-
-    // Send admin email notification
-    try {
-      const html = orderEmailHtml({
+      const sanitized = {
+        id: orderId,
+        orderId,
         customerName: newOrder.customerName,
         customerEmail: newOrder.customerEmail,
+        customerPhone: newOrder.customerPhone,
+        festivalDate: newOrder.festivalDate,
+        pickupNote: newOrder.pickupNote || '',
+        items: newOrder.items,
+        total: newOrder.total,
+        status: newOrder.status,
+        paymentStatus: newOrder.paymentStatus,
+        createdAt: newOrder.createdAt,
+      };
+      await setDoc(doc(db, 'orders', orderId), sanitized, { merge: true });
+      console.log(`✅ Order ${orderId} successfully registered into Firebase DB!`);
+    } catch (fsErr) {
+      console.error('[Firestore Order Insert Error]:', fsErr);
+    }
+
+    // 2. Also keep in memory array for instantaneous local fallback
+    inMemoryOrders = [newOrder, ...inMemoryOrders.filter((o) => o.orderId !== orderId)];
+
+    // 3. Send email to Admin
+    try {
+      const adminHtml = orderEmailHtml({
+        orderId: newOrder.orderId,
+        customerName: newOrder.customerName,
+        customerEmail: newOrder.customerEmail,
+        customerPhone: newOrder.customerPhone,
+        festivalDate: newOrder.festivalDate,
+        pickupNote: newOrder.pickupNote,
         items: newOrder.items,
         total: newOrder.total,
       });
-      await sendAdminEmail(`New Order ${orderId} - ₹${newOrder.total}`, html);
+      await sendAdminEmail(`🚨 New Order ${orderId} - ₹${newOrder.total} (${newOrder.customerName})`, adminHtml);
     } catch (emailErr) {
-      console.warn('[Order Email Notification Warning]:', emailErr);
+      console.error('[Admin Order Email Error]:', emailErr);
+    }
+
+    // 4. Send Order Confirmation Email to Customer
+    try {
+      if (newOrder.customerEmail && newOrder.customerEmail.includes('@') && !newOrder.customerEmail.includes('fireworks.local')) {
+        const customerHtml = customerOrderConfirmationEmailHtml({
+          orderId: newOrder.orderId,
+          customerName: newOrder.customerName,
+          customerEmail: newOrder.customerEmail,
+          customerPhone: newOrder.customerPhone,
+          festivalDate: newOrder.festivalDate,
+          pickupNote: newOrder.pickupNote,
+          items: newOrder.items,
+          total: newOrder.total,
+        });
+        await sendCustomerEmail(
+          newOrder.customerEmail,
+          `✨ Festive Order Booking Confirmation [${orderId}] - Sparklers & Smiles`,
+          customerHtml
+        );
+      }
+    } catch (custEmailErr) {
+      console.error('[Customer Order Confirmation Email Error]:', custEmailErr);
     }
 
     return NextResponse.json({
