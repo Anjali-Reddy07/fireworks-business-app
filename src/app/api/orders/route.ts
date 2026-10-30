@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-export const dynamic = 'force-dynamic';
 import { sendAdminEmail, orderEmailHtml } from '@/lib/email';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';

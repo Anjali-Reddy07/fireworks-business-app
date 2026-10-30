@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-export const dynamic = 'force-dynamic';
 import { getAdminSession } from '@/lib/auth';
 import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';

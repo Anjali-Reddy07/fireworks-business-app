@@ -11,14 +11,7 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-DTDDX0WL8X',
 };
 
-let app;
-let db;
-
-try {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  db = getFirestore(app);
-} catch (e) {
-  console.warn('Firebase initialization warning:', e);
-}
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
 export { app, db };
