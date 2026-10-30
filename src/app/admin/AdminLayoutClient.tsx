@@ -14,6 +14,7 @@ import {
   LogOut,
   ExternalLink,
   Users,
+  UserCheck,
 } from 'lucide-react';
 import { BUSINESS_CONFIG } from '@/lib/data/sample-products';
 
@@ -44,6 +45,7 @@ export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
     { href: '/admin', label: 'Overview', icon: LayoutDashboard },
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+    { href: '/admin/users', label: 'Customers', icon: UserCheck },
     { href: '/admin/inventory', label: 'Inventory', icon: Boxes },
     { href: '/admin/inquiries', label: 'Inquiries', icon: MessageSquare },
     { href: '/admin/logs', label: 'Audit Logs', icon: ClipboardList },
