@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { sendAdminEmail, productEmailHtml } from '@/lib/email';
 import { getAdminSession } from '@/lib/auth';
@@ -132,6 +134,7 @@ export async function POST(req: NextRequest) {
         Object.entries(newProd).filter(([, v]) => v !== undefined)
       );
       await setDoc(doc(db, 'fireworks', newProd.id), sanitized);
+      await setDoc(doc(db, 'products', newProd.id), sanitized);
     } catch (fsErr) {
       console.warn('[Firestore Add Product Warning]:', fsErr);
     }
@@ -192,6 +195,7 @@ export async function PUT(req: NextRequest) {
         Object.entries(productData).filter(([, v]) => v !== undefined)
       );
       await setDoc(doc(db, 'fireworks', productData.id), sanitized, { merge: true });
+      await setDoc(doc(db, 'products', productData.id), sanitized, { merge: true });
     } catch (fsErr) {
       console.warn('[Firestore Update Product Warning]:', fsErr);
     }
@@ -231,6 +235,7 @@ export async function DELETE(req: NextRequest) {
     // Also delete from Firebase Firestore
     try {
       await deleteDoc(doc(db, 'fireworks', id));
+      await deleteDoc(doc(db, 'products', id));
     } catch (fsErr) {
       console.warn('[Firestore Delete Product Warning]:', fsErr);
     }

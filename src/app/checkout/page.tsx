@@ -115,6 +115,26 @@ export default function CheckoutPage() {
       console.warn('Client Firestore direct write note:', clientFsErr);
     }
 
+    // Client-side direct Firestore customer upsert into `users` collection
+    try {
+      const userDoc = {
+        name: customerName.trim(),
+        email: cleanEmail.toLowerCase(),
+        phone: cleanPhone,
+        role: 'customer',
+        admin: false,
+        isAdmin: false,
+        createdAt: new Date().toISOString(),
+        lastOrderId: orderId,
+        lastOrderTotal: total,
+      };
+      const cleanKey = cleanEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      await setDoc(doc(db, 'users', `cust-${cleanKey}`), userDoc, { merge: true });
+      console.log(`[Checkout] Client-side Firestore user saved: cust-${cleanKey}`);
+    } catch (clientUserErr) {
+      console.warn('Client Firestore user write note:', clientUserErr);
+    }
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',

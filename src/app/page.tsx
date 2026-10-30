@@ -26,8 +26,21 @@ export default function HomePage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const snapshot = await getDocs(collection(db, 'fireworks'));
-        const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        let fetched: Product[] = [];
+        const snapshot1 = await getDocs(collection(db, 'fireworks'));
+        if (!snapshot1.empty) {
+          fetched = snapshot1.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        }
+
+        const snapshot2 = await getDocs(collection(db, 'products'));
+        if (!snapshot2.empty) {
+          const extra = snapshot2.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+          const seen = new Set(fetched.map(p => p.id));
+          for (const p of extra) {
+            if (!seen.has(p.id)) fetched.push(p);
+          }
+        }
+
         setProducts(fetched.length > 0 ? fetched : INITIAL_PRODUCTS);
         setLoading(false);
       } catch (err) {

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { adminStore, getAdminSession, AdminUser } from '@/lib/auth';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
