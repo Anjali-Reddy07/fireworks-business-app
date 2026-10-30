@@ -465,14 +465,22 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Back to storefront */}
-        <div className="mt-6 text-center">
+        {/* Back to storefront and admin portal link */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-400 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Storefront</span>
+          </Link>
+
+          <Link
+            href="/admin/login"
+            className="inline-flex items-center gap-1.5 text-xs text-amber-400/90 hover:text-amber-300 transition-colors"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+            <span>Dedicated Admin Portal &rarr;</span>
           </Link>
         </div>
       </div>

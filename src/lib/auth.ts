@@ -12,7 +12,15 @@ export interface AdminUser {
 // ─── In-Memory Admin Account Store ─────────────────────────────────────────
 
 class AdminStore {
-  private admins: (AdminUser & { passwordHash: string })[] = [];
+  private admins: (AdminUser & { passwordHash: string })[] = [
+    {
+      id: 'admin-master',
+      username: 'admin',
+      email: 'admin@sparklersandsmiles.com',
+      passwordHash: Buffer.from('password123:fireworks_admin_salt_v2').toString('base64'),
+      createdAt: new Date().toISOString(),
+    },
+  ];
 
   private hashPassword(password: string): string {
     return Buffer.from(password + ':fireworks_admin_salt_v2').toString('base64');

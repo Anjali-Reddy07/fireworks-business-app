@@ -140,7 +140,7 @@ export function Navbar({ onOpenInquiry }: NavbarProps) {
                 <span>Sign In</span>
               </Link>
               <Link
-                href="/admin"
+                href="/admin/login"
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-300 hover:bg-slate-900/80 px-2 py-1.5 rounded-lg transition-colors"
                 title="Admin Control Panel"
               >
@@ -249,7 +249,7 @@ export function Navbar({ onOpenInquiry }: NavbarProps) {
               </Link>
 
               <Link
-                href="/admin"
+                href="/admin/login"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
               >
