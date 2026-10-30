@@ -159,38 +159,28 @@ export async function POST(req: NextRequest) {
 
       // 1b. Auto-register or update customer in Firebase Firestore `users` collection
       if (newOrder.customerEmail && !newOrder.customerEmail.includes('fireworks.local')) {
-        const normalizedEmail = newOrder.customerEmail.toLowerCase().trim();
-        const userQuery = query(collection(db, 'users'), where('email', '==', normalizedEmail));
-        const userSnap = await getDocs(userQuery);
-        if (userSnap.empty) {
-          const custId = `cust-${Date.now()}`;
-          await setDoc(doc(db, 'users', custId), {
-            id: custId,
-            name: newOrder.customerName,
-            email: normalizedEmail,
-            phone: newOrder.customerPhone,
-            role: 'customer',
-            admin: false,
-            isAdmin: false,
-            createdAt: newOrder.createdAt,
-            lastOrderId: orderId,
-            lastOrderTotal: newOrder.total,
-          });
-          console.log(`✅ Customer ${newOrder.customerName} (${normalizedEmail}) auto-saved into Firebase 'users' collection!`);
-        } else {
-          const existingUserDoc = userSnap.docs[0];
+        try {
+          const normalizedEmail = newOrder.customerEmail.toLowerCase().trim();
+          const custDocId = `cust-${normalizedEmail.replace(/[^a-z0-9]/g, '_')}`;
           await setDoc(
-            doc(db, 'users', existingUserDoc.id),
+            doc(db, 'users', custDocId),
             {
-              phone: newOrder.customerPhone || existingUserDoc.data().phone,
-              lastOrderId: orderId,
-              lastOrderTotal: newOrder.total,
+              id: custDocId,
+              name: newOrder.customerName,
+              email: normalizedEmail,
+              phone: newOrder.customerPhone || '',
+              role: 'customer',
               admin: false,
               isAdmin: false,
-              role: existingUserDoc.data().role || 'customer',
+              createdAt: newOrder.createdAt,
+              lastOrderId: orderId,
+              lastOrderTotal: newOrder.total,
             },
             { merge: true }
           );
+          console.log(`✅ Customer ${newOrder.customerName} (${normalizedEmail}) auto-saved into Firebase 'users' collection!`);
+        } catch (custErr) {
+          console.warn('[Firestore Customer Upsert Warning]:', custErr);
         }
       }
     } catch (fsErr) {
