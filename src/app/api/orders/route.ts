@@ -5,7 +5,7 @@ import {
   orderEmailHtml, 
   customerOrderConfirmationEmailHtml 
 } from '@/lib/email';
-import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export interface OrderRecord {
@@ -154,8 +154,45 @@ export async function POST(req: NextRequest) {
       };
       await setDoc(doc(db, 'orders', orderId), sanitized, { merge: true });
       console.log(`✅ Order ${orderId} successfully registered into Firebase DB!`);
+
+      // 1b. Auto-register or update customer in Firebase Firestore `users` collection
+      if (newOrder.customerEmail && !newOrder.customerEmail.includes('fireworks.local')) {
+        const normalizedEmail = newOrder.customerEmail.toLowerCase().trim();
+        const userQuery = query(collection(db, 'users'), where('email', '==', normalizedEmail));
+        const userSnap = await getDocs(userQuery);
+        if (userSnap.empty) {
+          const custId = `cust-${Date.now()}`;
+          await setDoc(doc(db, 'users', custId), {
+            id: custId,
+            name: newOrder.customerName,
+            email: normalizedEmail,
+            phone: newOrder.customerPhone,
+            role: 'customer',
+            admin: false,
+            isAdmin: false,
+            createdAt: newOrder.createdAt,
+            lastOrderId: orderId,
+            lastOrderTotal: newOrder.total,
+          });
+          console.log(`✅ Customer ${newOrder.customerName} (${normalizedEmail}) auto-saved into Firebase 'users' collection!`);
+        } else {
+          const existingUserDoc = userSnap.docs[0];
+          await setDoc(
+            doc(db, 'users', existingUserDoc.id),
+            {
+              phone: newOrder.customerPhone || existingUserDoc.data().phone,
+              lastOrderId: orderId,
+              lastOrderTotal: newOrder.total,
+              admin: false,
+              isAdmin: false,
+              role: existingUserDoc.data().role || 'customer',
+            },
+            { merge: true }
+          );
+        }
+      }
     } catch (fsErr) {
-      console.error('[Firestore Order Insert Error]:', fsErr);
+      console.error('[Firestore Order/User Insert Error]:', fsErr);
     }
 
     // 2. Also keep in memory array for instantaneous local fallback

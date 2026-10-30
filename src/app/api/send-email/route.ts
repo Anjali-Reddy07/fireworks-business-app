@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { collection, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   sendAdminEmail,
   sendCustomerEmail,
@@ -221,6 +223,69 @@ export async function POST(req: NextRequest) {
 
       const customerHtml = generateCustomerHtml(customerName, orderId, orderDetails);
       const adminHtml = generateAdminHtml(customerName, customerEmail, orderId, orderDetails);
+
+      // Save order and customer into Firebase Firestore Database
+      try {
+        const items = Array.isArray(orderDetails?.items) ? orderDetails.items : [];
+        const total = Number(orderDetails?.total || 0);
+        const orderDoc = {
+          id: orderId,
+          orderId,
+          customerName: customerName.trim(),
+          customerEmail: customerEmail.trim().toLowerCase(),
+          customerPhone: orderDetails?.phone || orderDetails?.customerPhone || '',
+          festivalDate: orderDetails?.festivalDate || '2026-11-01',
+          pickupNote: orderDetails?.pickupNote || orderDetails?.summary || '',
+          items: items.length > 0 ? items : [{ name: orderDetails?.summary || 'Festive Fireworks Order', quantity: 1, price: total }],
+          total,
+          status: 'Pending',
+          paymentStatus: 'Pay at Counter',
+          createdAt: new Date().toISOString(),
+          admin: 'Store Administrator',
+          adminStatus: 'Pending Review',
+          adminAssigned: 'Admin Desk',
+          adminNotes: '',
+          isAdminApproved: false,
+        };
+        await setDoc(doc(db, 'orders', orderId), orderDoc, { merge: true });
+        console.log(`✅ [Send-Email API] Order ${orderId} saved to Firebase Firestore 'orders' collection!`);
+
+        // Also save or update customer in `users` collection
+        const normalizedEmail = customerEmail.trim().toLowerCase();
+        const userQuery = query(collection(db, 'users'), where('email', '==', normalizedEmail));
+        const userSnap = await getDocs(userQuery);
+        if (userSnap.empty) {
+          const custId = `cust-${Date.now()}`;
+          await setDoc(doc(db, 'users', custId), {
+            id: custId,
+            name: customerName.trim(),
+            email: normalizedEmail,
+            phone: orderDetails?.phone || orderDetails?.customerPhone || '',
+            role: 'customer',
+            admin: false,
+            isAdmin: false,
+            createdAt: new Date().toISOString(),
+            lastOrderId: orderId,
+            lastOrderTotal: total,
+          });
+          console.log(`✅ [Send-Email API] Customer ${customerName} saved to Firebase 'users' collection!`);
+        } else {
+          const existingUserDoc = userSnap.docs[0];
+          await setDoc(
+            doc(db, 'users', existingUserDoc.id),
+            {
+              lastOrderId: orderId,
+              lastOrderTotal: total,
+              admin: false,
+              isAdmin: false,
+              role: existingUserDoc.data().role || 'customer',
+            },
+            { merge: true }
+          );
+        }
+      } catch (fsErr) {
+        console.error('[Send-Email API Firestore Save Warning]:', fsErr);
+      }
 
       const emailResults: {
         customerEmailSent: boolean;

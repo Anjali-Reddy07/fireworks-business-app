@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { devStore, isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';
 import { sendInquiryNotification } from '@/lib/notifications';
 import { RequirementType } from '@/types';
+import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export async function POST(req: NextRequest) {
   try {
@@ -80,6 +82,48 @@ export async function POST(req: NextRequest) {
       }
     } else {
       createdInquiry = devStore.saveInquiry(inquiryPayload);
+    }
+
+    // Save to Firebase Firestore `inquiries` and `users` collections
+    try {
+      const inqId = createdInquiry.refId || `INQ-${Date.now()}`;
+      await setDoc(doc(db, 'inquiries', inqId), {
+        id: inqId,
+        refId: inqId,
+        customerName: inquiryPayload.customerName,
+        phone: inquiryPayload.phone,
+        email: inquiryPayload.email || '',
+        festivalDate: inquiryPayload.festivalDate,
+        requirementType: inquiryPayload.requirementType,
+        notes: inquiryPayload.notes || '',
+        status: 'Pending',
+        createdAt: new Date().toISOString(),
+        admin: 'Store Administrator',
+        adminStatus: 'Pending Review',
+        isAdminApproved: false,
+      }, { merge: true });
+
+      // Auto-register customer in `users` collection if email exists
+      if (inquiryPayload.email && inquiryPayload.email.includes('@')) {
+        const normEmail = inquiryPayload.email.toLowerCase().trim();
+        const userQuery = query(collection(db, 'users'), where('email', '==', normEmail));
+        const userSnap = await getDocs(userQuery);
+        if (userSnap.empty) {
+          const custId = `cust-${Date.now()}`;
+          await setDoc(doc(db, 'users', custId), {
+            id: custId,
+            name: inquiryPayload.customerName,
+            email: normEmail,
+            phone: inquiryPayload.phone,
+            role: 'customer',
+            admin: false,
+            isAdmin: false,
+            createdAt: new Date().toISOString(),
+          });
+        }
+      }
+    } catch (fsErr) {
+      console.warn('[Firestore Inquiry Save Warning]:', fsErr);
     }
 
     // Dispatch WhatsApp mobile notification to owner asynchronously
