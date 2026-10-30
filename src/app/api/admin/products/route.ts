@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { sendAdminEmail, productEmailHtml } from '@/lib/email';
 import { getAdminSession } from '@/lib/auth';
 import { devStore, isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';

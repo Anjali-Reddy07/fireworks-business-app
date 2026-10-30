@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { devStore, isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';
 import { sendInquiryNotification } from '@/lib/notifications';
 import { RequirementType } from '@/types';

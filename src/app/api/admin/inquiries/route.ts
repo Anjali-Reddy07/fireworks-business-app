@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { getAdminSession } from '@/lib/auth';
 import { devStore, isSupabaseConfigured, getAdminSupabase } from '@/lib/supabase';
 import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
