@@ -176,11 +176,12 @@ export async function registerAdmin(
     console.warn('[Firestore Admin Check Warning]:', fsErr);
   }
 
-  const newAdminRecord: AdminUser & { passwordHash: string } = {
+  const newAdminRecord: AdminUser & { passwordHash: string; admin: boolean } = {
     id: adminId,
     username: normalizedUsername,
     email: normalizedEmail,
     role: 'admin',
+    admin: true,
     isAdmin: true,
     passwordHash: pwdHash,
     createdAt: new Date().toISOString(),
@@ -203,6 +204,7 @@ export async function registerAdmin(
       email: normalizedEmail,
       phone: '+91 6371512551',
       role: 'admin',
+      admin: true,
       isAdmin: true,
       createdAt: newAdminRecord.createdAt,
     });

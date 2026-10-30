@@ -26,6 +26,11 @@ export interface OrderRecord {
   status: 'Pending' | 'Confirmed' | 'Dispatched' | 'Delivered' | 'Cancelled';
   paymentStatus: 'Pay at Counter' | 'Paid';
   createdAt: string;
+  admin?: string;
+  adminStatus?: string;
+  adminAssigned?: string;
+  adminNotes?: string;
+  isAdminApproved?: boolean;
 }
 
 // In-memory fallback
@@ -140,6 +145,12 @@ export async function POST(req: NextRequest) {
         status: newOrder.status,
         paymentStatus: newOrder.paymentStatus,
         createdAt: newOrder.createdAt,
+        // Admin column and review tracking
+        admin: 'Store Administrator',
+        adminStatus: 'Pending Review',
+        adminAssigned: 'Admin Desk',
+        adminNotes: '',
+        isAdminApproved: false,
       };
       await setDoc(doc(db, 'orders', orderId), sanitized, { merge: true });
       console.log(`✅ Order ${orderId} successfully registered into Firebase DB!`);
@@ -150,9 +161,36 @@ export async function POST(req: NextRequest) {
     // 2. Also keep in memory array for instantaneous local fallback
     inMemoryOrders = [newOrder, ...inMemoryOrders.filter((o) => o.orderId !== orderId)];
 
-    // 3. Send email to Admin
-    try {
-      const adminHtml = orderEmailHtml({
+    // 3. Send Notification & Confirmation Emails Concurrently
+    let adminEmailSent = false;
+    let customerEmailSent = false;
+
+    const emailTasks: Promise<void>[] = [];
+
+    // Admin order notification email
+    const adminHtml = orderEmailHtml({
+      orderId: newOrder.orderId,
+      customerName: newOrder.customerName,
+      customerEmail: newOrder.customerEmail,
+      customerPhone: newOrder.customerPhone,
+      festivalDate: newOrder.festivalDate,
+      pickupNote: newOrder.pickupNote,
+      items: newOrder.items,
+      total: newOrder.total,
+    });
+
+    emailTasks.push(
+      sendAdminEmail(`🚨 New Order ${orderId} - ₹${newOrder.total} (${newOrder.customerName})`, adminHtml)
+        .then((ok) => {
+          adminEmailSent = ok;
+          if (ok) console.log(`[Order API] Admin notification email sent for ${orderId}`);
+        })
+        .catch((err) => console.error('[Order API Admin Email Error]:', err))
+    );
+
+    // Customer order confirmation email
+    if (newOrder.customerEmail && newOrder.customerEmail.includes('@') && !newOrder.customerEmail.includes('fireworks.local')) {
+      const customerHtml = customerOrderConfirmationEmailHtml({
         orderId: newOrder.orderId,
         customerName: newOrder.customerName,
         customerEmail: newOrder.customerEmail,
@@ -162,38 +200,30 @@ export async function POST(req: NextRequest) {
         items: newOrder.items,
         total: newOrder.total,
       });
-      await sendAdminEmail(`🚨 New Order ${orderId} - ₹${newOrder.total} (${newOrder.customerName})`, adminHtml);
-    } catch (emailErr) {
-      console.error('[Admin Order Email Error]:', emailErr);
-    }
 
-    // 4. Send Order Confirmation Email to Customer
-    try {
-      if (newOrder.customerEmail && newOrder.customerEmail.includes('@') && !newOrder.customerEmail.includes('fireworks.local')) {
-        const customerHtml = customerOrderConfirmationEmailHtml({
-          orderId: newOrder.orderId,
-          customerName: newOrder.customerName,
-          customerEmail: newOrder.customerEmail,
-          customerPhone: newOrder.customerPhone,
-          festivalDate: newOrder.festivalDate,
-          pickupNote: newOrder.pickupNote,
-          items: newOrder.items,
-          total: newOrder.total,
-        });
-        await sendCustomerEmail(
+      emailTasks.push(
+        sendCustomerEmail(
           newOrder.customerEmail,
           `✨ Festive Order Booking Confirmation [${orderId}] - Sparklers & Smiles`,
           customerHtml
-        );
-      }
-    } catch (custEmailErr) {
-      console.error('[Customer Order Confirmation Email Error]:', custEmailErr);
+        )
+          .then((ok) => {
+            customerEmailSent = ok;
+            if (ok) console.log(`[Order API] Customer confirmation email sent to ${newOrder.customerEmail} for ${orderId}`);
+          })
+          .catch((err) => console.error('[Order API Customer Email Error]:', err))
+      );
     }
+
+    // Wait for email dispatches to settle
+    await Promise.allSettled(emailTasks);
 
     return NextResponse.json({
       success: true,
       orderId: newOrder.orderId,
       order: newOrder,
+      adminEmailSent,
+      customerEmailSent,
     });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Failed to process order';

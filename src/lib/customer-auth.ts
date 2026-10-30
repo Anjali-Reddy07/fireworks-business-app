@@ -116,6 +116,8 @@ export async function registerCustomer(
     email: normalizedEmail,
     passwordHash: pwdHash,
     role: 'customer',
+    admin: false,
+    isAdmin: false,
     createdAt: new Date().toISOString(),
   };
 

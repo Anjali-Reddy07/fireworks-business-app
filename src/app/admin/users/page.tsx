@@ -133,9 +133,9 @@ export default function AdminUsersPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="py-3 px-4">Customer</th>
+                <th className="py-3 px-4">Customer / User</th>
                 <th className="py-3 px-4">Contact Info</th>
-                <th className="py-3 px-4">Role / Type</th>
+                <th className="py-3 px-4">Role / Admin Status</th>
                 <th className="py-3 px-4">Joined Date</th>
                 <th className="py-3 px-4 text-right">Quick Contact</th>
               </tr>
@@ -188,12 +188,19 @@ export default function AdminUsersPage() {
                         )}
                       </td>
 
-                      {/* Role */}
+                      {/* Role & Admin Status */}
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 border border-blue-200 text-blue-700 uppercase tracking-wide">
-                          <ShieldCheck className="w-3 h-3 text-blue-600" />
-                          {u.role || 'Customer'}
-                        </span>
+                        {u.isAdmin || u.role === 'admin' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 border border-amber-300 text-amber-800 uppercase tracking-wide">
+                            <ShieldCheck className="w-3 h-3 text-amber-600" />
+                            Admin Staff
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 border border-blue-200 text-blue-700 uppercase tracking-wide">
+                            <ShieldCheck className="w-3 h-3 text-blue-600" />
+                            Customer
+                          </span>
+                        )}
                       </td>
 
                       {/* Joined Date */}

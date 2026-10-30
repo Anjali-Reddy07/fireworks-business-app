@@ -234,7 +234,7 @@ export default function AdminOrdersPage() {
                 <th className="py-3.5 px-4 font-semibold">Customer Details</th>
                 <th className="py-3.5 px-4 font-semibold">Pickup / Festival Date</th>
                 <th className="py-3.5 px-4 font-semibold">Items & Total</th>
-                <th className="py-3.5 px-4 font-semibold">Status</th>
+                <th className="py-3.5 px-4 font-semibold">Admin / Status</th>
                 <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -314,8 +314,8 @@ export default function AdminOrdersPage() {
                         </button>
                       </td>
 
-                      {/* Status Dropdown */}
-                      <td className="py-3.5 px-4">
+                      {/* Status & Admin Column */}
+                      <td className="py-3.5 px-4 space-y-1">
                         <select
                           value={ord.status}
                           disabled={updatingId === ord.orderId}
@@ -332,6 +332,9 @@ export default function AdminOrdersPage() {
                           <option value="Delivered">Delivered</option>
                           <option value="Cancelled">Cancelled</option>
                         </select>
+                        <span className="text-[10px] text-slate-400 block font-mono">
+                          Desk: {ord.admin || 'Store Admin'}
+                        </span>
                       </td>
 
                       {/* Actions */}

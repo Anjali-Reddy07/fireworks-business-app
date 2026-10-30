@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -39,6 +39,20 @@ export default function CheckoutPage() {
   const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-fill customer details from session if user is logged in
+  useEffect(() => {
+    fetch('/api/customer/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.customer) {
+          if (data.customer.name) setCustomerName(data.customer.name);
+          if (data.customer.phone) setCustomerPhone(data.customer.phone);
+          if (data.customer.email) setCustomerEmail(data.customer.email);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const totalItemsCount = items.reduce((sum, it) => sum + it.quantity, 0);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -56,6 +70,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    const cleanEmail = customerEmail.trim();
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setError('Please enter a valid email address so we can send your Order Confirmation & Booking Receipt.');
+      return;
+    }
+
     setLoading(true);
 
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
@@ -65,7 +85,7 @@ export default function CheckoutPage() {
       id: orderId,
       orderId,
       customerName: customerName.trim(),
-      customerEmail: customerEmail.trim() || 'counter@fireworks.local',
+      customerEmail: cleanEmail,
       customerPhone: cleanPhone,
       festivalDate,
       pickupNote: pickupNote.trim(),
@@ -79,11 +99,18 @@ export default function CheckoutPage() {
       status: 'Pending',
       paymentStatus: 'Pay at Counter',
       createdAt: new Date().toISOString(),
+      // Admin tracking columns in Firebase DB
+      admin: 'Store Administrator',
+      adminStatus: 'Pending Review',
+      adminAssigned: 'Admin Desk',
+      adminNotes: '',
+      isAdminApproved: false,
     };
 
     // Client-side direct Firestore save for 100% data persistence guarantee
     try {
       await setDoc(doc(db, 'orders', orderId), orderPayload);
+      console.log(`[Checkout] Client-side Firestore order saved: ${orderId}`);
     } catch (clientFsErr) {
       console.warn('Client Firestore direct write note:', clientFsErr);
     }
@@ -101,14 +128,13 @@ export default function CheckoutPage() {
         setOrderPlaced(true);
         clearCart();
       } else {
-        // If API route had transient error but direct firestore succeeded, still treat as placed!
+        // Fallback: If server had temporary issue but client saved
         setPlacedOrderId(orderId);
         setOrderPlaced(true);
         clearCart();
       }
     } catch (e: unknown) {
       console.error(e);
-      // Fallback: If client direct write was attempted, allow user to proceed with their orderId
       setPlacedOrderId(orderId);
       setOrderPlaced(true);
       clearCart();
@@ -134,8 +160,11 @@ export default function CheckoutPage() {
             </div>
           )}
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            Thank you, <strong>{customerName}</strong>! Your festive cracker booking has been registered. Our counter team will contact you via WhatsApp / Call at <strong className="text-blue-700">{customerPhone}</strong> to confirm the stock allocation and handover timing.
+            Thank you, <strong>{customerName}</strong>! Your festive cracker booking has been registered. An official confirmation email with your booking quotation has been dispatched to <strong className="text-blue-700">{customerEmail}</strong>.
           </p>
+          <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 text-left">
+            <span>📧 <strong>Email Sent:</strong> Please check your Inbox and Spam/Promotions tab for order details and payment counter receipt.</span>
+          </div>
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-600 space-y-1">
             <p><strong>Counter Support:</strong> {BUSINESS_CONFIG.phone}</p>
             <p><strong>License:</strong> {BUSINESS_CONFIG.pesoLicense}</p>
@@ -362,14 +391,15 @@ export default function CheckoutPage() {
 
                 <div>
                   <label className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Email (Optional)</span>
+                    <Mail className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Email Address * (For Booking Confirmation & Quotation)</span>
                   </label>
                   <input
                     type="email"
+                    required
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="name@example.com"
+                    placeholder="Enter email to receive order receipt"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
