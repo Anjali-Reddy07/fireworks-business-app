@@ -49,8 +49,8 @@ export function ProductGrid({
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesName = p.name.toLowerCase().includes(query);
-        const matchesDesc = p.description.toLowerCase().includes(query);
-        const matchesCat = p.categoryName.toLowerCase().includes(query);
+        const matchesDesc = (p.description || '').toLowerCase().includes(query);
+        const matchesCat = (p.categoryName || '').toLowerCase().includes(query);
         if (!matchesName && !matchesDesc && !matchesCat) return false;
       }
 
@@ -75,20 +75,20 @@ export function ProductGrid({
     <section id="catalogue" className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-3">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-3 shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
           <span>Transparent Retail Price Guide</span>
         </div>
-        <h2 className="text-2xl xs:text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2 sm:mb-3">
+        <h2 className="text-2xl xs:text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-2 sm:mb-3">
           Explore Our Festive Catalogue
         </h2>
-        <p className="text-xs sm:text-sm text-slate-400">
+        <p className="text-xs sm:text-sm text-slate-600">
           Browse authentic fireworks manufactured in Sivakasi. Filter by category, sound level, or certified green crackers.
         </p>
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 sm:p-6 mb-6 sm:mb-8 space-y-3 sm:space-y-4">
+      <div className="bg-white border border-blue-100 rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 space-y-4 shadow-sm">
         {/* Search & Sort row */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="relative w-full sm:max-w-md">
@@ -98,12 +98,12 @@ export function ProductGrid({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search sparkler, anar, sky shot..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -112,12 +112,12 @@ export function ProductGrid({
 
           <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Sort selector */}
-            <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-400 flex-1 sm:flex-none">
-              <span className="shrink-0 hidden xs:inline">Sort:</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-600 flex-1 sm:flex-none">
+              <span className="shrink-0 hidden xs:inline font-semibold">Sort:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full sm:w-auto bg-slate-950 border border-slate-800 rounded-xl px-2.5 sm:px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-2.5 sm:px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-blue-500"
               >
                 <option value="featured">Featured First</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -129,10 +129,10 @@ export function ProductGrid({
             {/* Green Cracker quick toggle */}
             <button
               onClick={() => setGreenCrackerOnly(!greenCrackerOnly)}
-              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                 greenCrackerOnly
-                  ? 'bg-emerald-950 border-emerald-500 text-emerald-300'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               🌿 Green Only
@@ -141,13 +141,13 @@ export function ProductGrid({
         </div>
 
         {/* Category Filter Pills (Touch scroll enabled) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 pt-2 border-t border-slate-800/80 touch-scroll scrollbar-none">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 pt-2 border-t border-slate-100 touch-scroll scrollbar-none">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
               selectedCategory === 'all'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-slate-700 hover:text-white'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
+                : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700 border border-slate-200'
             }`}
           >
             All Categories ({products.length})
@@ -161,10 +161,10 @@ export function ProductGrid({
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                   isSelected
-                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                    : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-slate-700 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
+                    : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-700 border border-slate-200'
                 }`}
               >
                 {cat.name} ({count})
@@ -174,14 +174,14 @@ export function ProductGrid({
         </div>
 
         {/* Sound Level Filter Pills */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-xs text-slate-400 touch-scroll scrollbar-none">
-          <span className="shrink-0 text-slate-500 hidden sm:inline">Sound:</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-xs text-slate-500 touch-scroll scrollbar-none">
+          <span className="shrink-0 font-bold text-slate-700 hidden sm:inline">Sound:</span>
           <button
             onClick={() => setSelectedSound('all')}
-            className={`px-2.5 py-1 rounded-lg text-xs cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer whitespace-nowrap shrink-0 transition-colors ${
               selectedSound === 'all'
-                ? 'bg-slate-800 text-amber-400 font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-slate-600 hover:text-blue-700'
             }`}
           >
             Any Sound
@@ -190,10 +190,10 @@ export function ProductGrid({
             <button
               key={s}
               onClick={() => setSelectedSound(s)}
-              className={`px-2.5 py-1 rounded-lg text-xs cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer whitespace-nowrap shrink-0 transition-colors ${
                 selectedSound === s
-                  ? 'bg-slate-800 text-amber-400 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-slate-600 hover:text-blue-700'
               }`}
             >
               {s}
@@ -203,9 +203,9 @@ export function ProductGrid({
       </div>
 
       {/* Results Count & Active Filters Indicator */}
-      <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 text-xs text-slate-400 mb-6 px-1">
+      <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 text-xs text-slate-500 mb-6 px-1">
         <span>
-          Showing <strong>{filteredProducts.length}</strong> items available at our counter
+          Showing <strong className="text-slate-900">{filteredProducts.length}</strong> items available at our counter
         </span>
         {(selectedCategory !== 'all' || selectedSound !== 'all' || searchQuery || greenCrackerOnly) && (
           <button
@@ -215,7 +215,7 @@ export function ProductGrid({
               setSearchQuery('');
               setGreenCrackerOnly(false);
             }}
-            className="text-amber-400 hover:underline cursor-pointer"
+            className="text-blue-600 font-bold hover:underline cursor-pointer"
           >
             Reset Filters
           </button>
@@ -236,12 +236,12 @@ export function ProductGrid({
         </div>
       ) : (
         /* Empty State */
-        <div className="text-center py-12 sm:py-16 px-4 bg-slate-900/50 rounded-3xl border border-slate-800">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-800/80 flex items-center justify-center mx-auto mb-4 text-slate-400">
+        <div className="text-center py-12 sm:py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-sm">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-4 text-blue-600">
             <SlidersHorizontal className="w-6 h-6 sm:w-8 sm:h-8" />
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-white mb-2">No Fireworks Match Your Filter</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto mb-6">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">No Fireworks Match Your Filter</h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto mb-6">
             Try adjusting your search terms, sound level preference, or select &quot;All Categories&quot; to see our complete in-stock assortment.
           </p>
           <button
@@ -251,7 +251,7 @@ export function ProductGrid({
               setSearchQuery('');
               setGreenCrackerOnly(false);
             }}
-            className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs cursor-pointer shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors"
           >
             Show All Products
           </button>

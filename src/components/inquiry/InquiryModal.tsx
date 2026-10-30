@@ -116,24 +116,24 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200"
       onClick={handleResetAndClose}
     >
       <div 
-        className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950/80">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-slate-50">
           <div>
-            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">
+            <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider block">
               Seasonal Pre-Booking & Quotation
             </span>
-            <h3 className="text-base sm:text-xl font-bold text-white">Festive Stock & Price Quote Inquiry</h3>
+            <h3 className="text-base sm:text-xl font-bold text-slate-900">Festive Stock & Price Quote Inquiry</h3>
           </div>
           <button
             onClick={handleResetAndClose}
-            className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -145,25 +145,25 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
           {successRef ? (
             /* Success confirmation screen */
             <div className="text-center py-4 sm:py-6 space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
                 <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
-              <h4 className="text-xl sm:text-2xl font-extrabold text-white">Festive Inquiry Confirmed!</h4>
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-950 border border-amber-500/30 max-w-sm mx-auto">
-                <span className="text-xs text-slate-400 block mb-1">Your Quote Reference ID:</span>
-                <span className="font-mono text-lg sm:text-xl font-extrabold text-amber-400 tracking-wider">
+              <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900">Festive Inquiry Confirmed!</h4>
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-blue-200 max-w-sm mx-auto">
+                <span className="text-xs text-slate-500 block mb-1">Your Quote Reference ID:</span>
+                <span className="font-mono text-lg sm:text-xl font-extrabold text-blue-600 tracking-wider">
                   {successRef}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+              <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
                 Thank you, <strong>{customerName}</strong>! Our <strong>{BUSINESS_CONFIG.name}</strong> team has received your inquiry for <strong>{festivalDate}</strong>. We will share your festive quotation and available combo options via WhatsApp / Call.
               </p>
-              <div className="p-3 rounded-xl bg-slate-800/80 text-[11px] text-slate-400 max-w-md mx-auto text-left">
-                <strong>Need instant assistance?</strong> Call or message our team directly at <strong className="text-amber-400">{BUSINESS_CONFIG.phone}</strong>.
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-[11px] text-blue-900 max-w-md mx-auto text-left">
+                <strong>Need instant assistance?</strong> Call or message our team directly at <strong className="text-blue-700 font-bold">{BUSINESS_CONFIG.phone}</strong>.
               </div>
               <button
                 onClick={handleResetAndClose}
-                className="mt-4 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer"
+                className="mt-4 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer shadow-md shadow-blue-600/20"
               >
                 Close
               </button>
@@ -172,16 +172,16 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
             /* Form */
             <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
               {/* Statutory Note */}
-              <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/20 text-amber-300 text-[11px] sm:text-xs flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 shrink-0 text-amber-400" />
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-[11px] sm:text-xs flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 shrink-0 text-blue-600" />
                 <span>
                   No online payment collected. This inquiry reserves your festive stock and requests custom package rates.
                 </span>
               </div>
 
               {error && (
-                <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                   <span>{error}</span>
                 </div>
               )}
@@ -189,8 +189,8 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
               {/* Name & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-amber-400" />
+                  <label className="text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-blue-600" />
                     <span>Your Full Name *</span>
                   </label>
                   <input
@@ -199,13 +199,13 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="e.g. Senthil Nathan"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                  <label className="text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Mobile Number *</span>
                   </label>
                   <input
@@ -214,7 +214,7 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="10-digit mobile number"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 font-mono"
                   />
                 </div>
               </div>
@@ -222,8 +222,8 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
               {/* Email & Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-sky-400" />
+                  <label className="text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-blue-600" />
                     <span>Email (Optional)</span>
                   </label>
                   <input
@@ -231,13 +231,13 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@gmail.com"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                  <label className="text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
                     <span>Festival / Celebration Date *</span>
                   </label>
                   <input
@@ -246,20 +246,20 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
                     min="2026-10-01"
                     value={festivalDate}
                     onChange={(e) => setFestivalDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600"
                   />
                 </div>
               </div>
 
               {/* Requirement Category */}
               <div>
-                <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">
                   Requirement Category
                 </label>
                 <select
                   value={requirementType}
                   onChange={(e) => setRequirementType(e.target.value as RequirementType)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-blue-600"
                 >
                   <option value="Diwali Festive Family Pack">Diwali Festive Family Assortment Pack</option>
                   <option value="Wedding & Celebration Special">Wedding & Celebration Grand Package</option>
@@ -271,7 +271,7 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
 
               {/* Notes */}
               <div>
-                <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                   <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
                   <span>Items of Interest, Budget, or Special Requests</span>
                 </label>
@@ -280,7 +280,7 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
                   value={notes}
                   onChange={(e) => setCustomNotes(e.target.value)}
                   placeholder="e.g. Please share quotation for 2 family gift hampers within ₹5,000 budget."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 resize-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 resize-none"
                 />
               </div>
 
@@ -289,7 +289,7 @@ export function InquiryModal({ isOpen, onClose, preselectedProduct }: InquiryMod
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
                     <>

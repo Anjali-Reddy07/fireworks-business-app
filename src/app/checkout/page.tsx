@@ -97,30 +97,30 @@ export default function CheckoutPage() {
 
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-2xl animate-in">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto">
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
+        <div className="max-w-md w-full bg-white border border-blue-200 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-xl animate-in">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-extrabold text-white">Festive Pre-Order Received!</h2>
+          <h2 className="text-2xl font-black text-slate-900">Festive Pre-Order Received!</h2>
           {placedOrderId && (
-            <div className="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 max-w-xs mx-auto">
-              <span className="text-xs text-slate-400 block mb-1">Your Order Booking Reference:</span>
-              <span className="font-mono text-xl font-extrabold text-amber-400 tracking-wider">
+            <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 max-w-xs mx-auto">
+              <span className="text-xs text-slate-500 block mb-1">Your Order Booking Reference:</span>
+              <span className="font-mono text-xl font-black text-blue-700 tracking-wider">
                 {placedOrderId}
               </span>
             </div>
           )}
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Thank you, <strong>{customerName}</strong>! Your festive cracker booking has been registered. Our counter team will contact you via WhatsApp / Call at <strong className="text-amber-400">{customerPhone}</strong> to confirm the stock allocation and handover timing.
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Thank you, <strong>{customerName}</strong>! Your festive cracker booking has been registered. Our counter team will contact you via WhatsApp / Call at <strong className="text-blue-700">{customerPhone}</strong> to confirm the stock allocation and handover timing.
           </p>
-          <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-left text-xs text-slate-400 space-y-1">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-600 space-y-1">
             <p><strong>Counter Support:</strong> {BUSINESS_CONFIG.phone}</p>
             <p><strong>License:</strong> {BUSINESS_CONFIG.pesoLicense}</p>
           </div>
           <button
             onClick={() => router.push('/')}
-            className="w-full py-3 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm cursor-pointer shadow-md hover:bg-amber-400 transition"
+            className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold text-sm cursor-pointer shadow-md hover:bg-blue-700 transition"
           >
             Return to Catalogue
           </button>
@@ -131,20 +131,20 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4">
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
         <div className="max-w-md w-full text-center space-y-5 animate-in">
-          <div className="w-20 h-20 rounded-3xl bg-slate-900 border border-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+          <div className="w-20 h-20 rounded-3xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center mx-auto shadow-sm">
             <ShoppingBag className="w-10 h-10" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white mb-2">Your Festive Cart is Empty</h2>
-            <p className="text-xs sm:text-sm text-slate-400">
+            <h2 className="text-2xl font-black text-slate-900 mb-2">Your Festive Cart is Empty</h2>
+            <p className="text-xs sm:text-sm text-slate-500">
               You haven&apos;t added any sparklers, flower pots, or aerial cakes to your selection yet.
             </p>
           </div>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm transition shadow-lg shadow-amber-500/20 cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition shadow-lg shadow-blue-500/20 cursor-pointer"
           >
             Explore Catalogue & Rates
           </button>
@@ -154,23 +154,23 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md px-4 sm:px-6 py-3.5">
+      <header className="sticky top-0 z-40 border-b border-blue-100 bg-white/95 backdrop-blur-md px-4 sm:px-6 py-3.5 shadow-xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 hover:text-amber-400 transition-colors"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Catalogue</span>
           </Link>
 
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-bold text-white text-sm hidden xs:inline">{BUSINESS_CONFIG.name}</span>
+            <span className="font-black text-slate-900 text-sm hidden xs:inline">{BUSINESS_CONFIG.name}</span>
           </div>
         </div>
       </header>
@@ -178,15 +178,15 @@ export default function CheckoutPage() {
       {/* Main Checkout Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Festive Pre-Order Checkout</h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Festive Pre-Order Checkout</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Review your selected fireworks and provide your contact information for seasonal allocation.
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
@@ -194,25 +194,26 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
           {/* Left Column: Cart items */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-                <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4 text-amber-400" />
+            <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-blue-600" />
                   <span>Selected Fireworks ({totalItemsCount} boxes)</span>
                 </h2>
                 <button
                   onClick={clearCart}
-                  className="text-xs text-rose-400 hover:text-rose-300 hover:underline cursor-pointer"
+                  className="text-xs text-rose-600 hover:text-rose-700 font-bold hover:underline cursor-pointer"
                 >
                   Clear All
                 </button>
               </div>
 
-              <div className="divide-y divide-slate-800/80">
+              <div className="divide-y divide-slate-100">
                 {items.map((it) => {
                   const p = it.product;
                   const isExternal = p.imageUrl && p.imageUrl.startsWith('http');
-                  const src = isExternal ? p.imageUrl : p.imageUrl ? `/images/${p.imageUrl}` : '';
+                  const isAbsoluteLocal = p.imageUrl && p.imageUrl.startsWith('/');
+                  const src = isExternal || isAbsoluteLocal ? p.imageUrl : p.imageUrl ? `/images/${p.imageUrl}` : '';
 
                   return (
                     <div
@@ -220,47 +221,47 @@ export default function CheckoutPage() {
                       className="py-4 first:pt-0 last:pb-0 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4"
                     >
                       <div className="flex items-center gap-3 w-full xs:w-auto">
-                        <div className="relative w-14 h-14 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden shrink-0">
+                        <div className="relative w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                           {src ? (
                             <Image src={src} alt={p.name} fill className="object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                            <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
                               Preview
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="font-bold text-white text-xs sm:text-sm block line-clamp-1">
+                          <span className="font-bold text-slate-900 text-xs sm:text-sm block line-clamp-1">
                             {p.name}
                           </span>
-                          <span className="text-[11px] text-amber-400 font-semibold block">
+                          <span className="text-[11px] text-blue-600 font-bold block">
                             ₹{p.retailPrice.toLocaleString('en-IN')} / box
                           </span>
-                          <span className="text-[10px] text-slate-400 block">
+                          <span className="text-[10px] text-slate-500 block">
                             {p.piecesPerPack} Pcs • {p.soundLevel}
                           </span>
                         </div>
                       </div>
 
                       {/* Quantity & Actions */}
-                      <div className="flex items-center justify-between xs:justify-end gap-3 w-full xs:w-auto pt-2 xs:pt-0 border-t xs:border-t-0 border-slate-800/60">
+                      <div className="flex items-center justify-between xs:justify-end gap-3 w-full xs:w-auto pt-2 xs:pt-0 border-t xs:border-t-0 border-slate-100">
                         {/* Adjuster */}
-                        <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl p-1">
+                        <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl p-1">
                           <button
                             type="button"
                             onClick={() => updateQuantity(p.id, it.quantity - 1)}
-                            className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
+                            className="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer shadow-xs"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="w-7 text-center font-bold text-xs text-white">
+                          <span className="w-7 text-center font-bold text-xs text-slate-900">
                             {it.quantity}
                           </span>
                           <button
                             type="button"
                             onClick={() => updateQuantity(p.id, it.quantity + 1)}
-                            className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
+                            className="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 flex items-center justify-center text-slate-700 cursor-pointer shadow-xs"
                             aria-label="Increase quantity"
                           >
                             <Plus className="w-3 h-3" />
@@ -269,7 +270,7 @@ export default function CheckoutPage() {
 
                         {/* Line Total */}
                         <div className="text-right min-w-[70px]">
-                          <span className="font-extrabold text-amber-400 text-sm block">
+                          <span className="font-black text-blue-600 text-sm block">
                             ₹{(p.retailPrice * it.quantity).toLocaleString('en-IN')}
                           </span>
                         </div>
@@ -278,7 +279,7 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           onClick={() => removeItem(p.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 transition cursor-pointer"
                           title="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -291,8 +292,8 @@ export default function CheckoutPage() {
             </div>
 
             {/* Compliance notice */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-950/20 border border-amber-500/20 text-amber-200/90 text-xs flex items-start gap-2.5">
-              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-start gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
                 <strong>Statutory Notice:</strong> No payment is charged right now online. This reservation locks your festive rates and allocates stock from our licensed retail counter.
               </p>
@@ -301,15 +302,15 @@ export default function CheckoutPage() {
 
           {/* Right Column: Customer details & Order Summary */}
           <div className="space-y-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
-              <h2 className="text-sm sm:text-base font-bold text-white mb-4">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 mb-4">
                 Booking Details & Summary
               </h2>
 
               <form onSubmit={handlePlaceOrder} className="space-y-3.5">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-amber-400" />
+                  <label className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-blue-600" />
                     <span>Full Name *</span>
                   </label>
                   <input
@@ -318,13 +319,13 @@ export default function CheckoutPage() {
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                  <label className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
                     <span>WhatsApp / Mobile Number *</span>
                   </label>
                   <input
@@ -333,13 +334,13 @@ export default function CheckoutPage() {
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     placeholder="10-digit mobile number"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-sky-400" />
+                  <label className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-blue-500" />
                     <span>Email (Optional)</span>
                   </label>
                   <input
@@ -347,13 +348,13 @@ export default function CheckoutPage() {
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                  <label className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
                     <span>Target Festival Date</span>
                   </label>
                   <input
@@ -362,12 +363,12 @@ export default function CheckoutPage() {
                     min="2026-10-01"
                     value={festivalDate}
                     onChange={(e) => setFestivalDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                  <label className="text-xs font-bold text-slate-700 mb-1 block">
                     Special Notes / Handover Preference
                   </label>
                   <textarea
@@ -375,30 +376,30 @@ export default function CheckoutPage() {
                     value={pickupNote}
                     onChange={(e) => setPickupNote(e.target.value)}
                     placeholder="e.g. Please pack in festive family gift bags."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white resize-none"
                   />
                 </div>
 
                 {/* Price Breakdown */}
-                <div className="pt-3 border-t border-slate-800 space-y-2 text-xs">
-                  <div className="flex justify-between text-slate-400">
+                <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
+                  <div className="flex justify-between text-slate-600">
                     <span>Total Boxes</span>
-                    <span>{totalItemsCount}</span>
+                    <span className="font-bold">{totalItemsCount}</span>
                   </div>
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-slate-600">
                     <span>Applicable Taxes</span>
-                    <span className="text-emerald-400">Included</span>
+                    <span className="text-emerald-700 font-bold">Included</span>
                   </div>
-                  <div className="flex justify-between text-base font-extrabold text-white pt-2 border-t border-slate-800">
+                  <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-100">
                     <span>Total Retail Value</span>
-                    <span className="text-amber-400">₹{total.toLocaleString('en-IN')}</span>
+                    <span className="text-blue-600 font-mono">₹{total.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full mt-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading ? (
                     <>

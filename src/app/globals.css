@@ -2,18 +2,19 @@
 
 @layer base {
   :root {
-    --bg-base: #08090d;
-    --bg-card: #0f1117;
-    --bg-card-hover: #141620;
-    --text-primary: #f8fafc;
-    --text-muted: #94a3b8;
-    --gold: #f59e0b;
-    --crimson: #ef4444;
+    --bg-base: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --primary-blue: #2563eb;
+    --navy: #1e3a8a;
+    --sky: #0ea5e9;
     --emerald: #10b981;
   }
 }
 
-/* ─── Premium Typography & Mobile Foundation ────────────────────────────── */
+/* ─── Premium Typography & Foundation ────────────────────────────────────── */
 html {
   overflow-x: hidden;
   width: 100%;
@@ -21,8 +22,8 @@ html {
 }
 
 body {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
+  background-color: #f8fafc;
+  color: #0f172a;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   width: 100%;
@@ -43,27 +44,26 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-
 h1, h2, h3, h4, h5, h6,
 .font-heading {
   font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   letter-spacing: -0.02em;
 }
 
-/* ─── Smooth Scrollbar ───────────────────────────────────────────────────── */
+/* ─── Smooth Blue Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f1117;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e2030;
+  background: #cbd5e1;
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2d40;
+  background: #94a3b8;
 }
 
 /* Hide scrollbar utility */
@@ -75,50 +75,19 @@ h1, h2, h3, h4, h5, h6,
   display: none;
 }
 
-/* ─── Festive Glow Utilities ─────────────────────────────────────────────── */
-.glow-gold {
-  box-shadow: 0 0 30px -6px rgba(245, 158, 11, 0.3);
+/* ─── Blue Glow Utilities ────────────────────────────────────────────────── */
+.glow-blue {
+  box-shadow: 0 0 30px -6px rgba(37, 99, 235, 0.25);
 }
 
-.glow-crimson {
-  box-shadow: 0 0 30px -6px rgba(239, 68, 68, 0.3);
+.glow-sky {
+  box-shadow: 0 0 30px -6px rgba(14, 165, 233, 0.25);
 }
 
-.glow-sparkle {
-  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.12) 0%, transparent 65%);
-}
-
-.sparkle-border {
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-/* ─── Glassmorphism Panel ────────────────────────────────────────────────── */
+/* ─── Glassmorphism Light Panel ──────────────────────────────────────────── */
 .glass-panel {
-  background: rgba(15, 17, 23, 0.80);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-/* ─── Subtle card hover lift ─────────────────────────────────────────────── */
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px -8px rgba(245, 158, 11, 0.12);
-}
-
-/* ─── Animate in helper ──────────────────────────────────────────────────── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0);   }
-}
-
-.animate-in {
-  animation: fadeIn 0.25s ease both;
-}
-
-.fade-in {
-  animation-name: fadeIn;
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
