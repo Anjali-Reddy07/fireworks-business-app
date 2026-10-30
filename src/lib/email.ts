@@ -36,23 +36,45 @@ function createSmtpTransporter() {
 export async function sendAdminEmail(subject: string, html: string): Promise<boolean> {
   const provider = process.env.EMAIL_PROVIDER || DEFAULT_EMAIL_PROVIDER;
   const to = process.env.EMAIL_TO || DEFAULT_EMAIL_TO;
-  const from = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
+  const resendKey = process.env.RESEND_API_KEY || '';
 
-  try {
-    if (provider === 'resend' && process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({ from, to, subject, html });
-    } else if (provider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      await sgMail.send({ to, from, subject, html });
-    } else {
-      const transporter = createSmtpTransporter();
-      await transporter.sendMail({ from: `"Sparkles & Smiles Orders" <${from}>`, to, subject, html });
+  // 1. Try Resend if configured
+  if (provider === 'resend' || resendKey) {
+    try {
+      const resend = new Resend(resendKey);
+      const resendFrom = process.env.RESEND_FROM || 'Fireworks Store <onboarding@resend.dev>';
+      const res = await resend.emails.send({ from: resendFrom, to, subject, html });
+      if (!res.error) {
+        console.log(`✅ Admin email sent successfully via Resend to ${to} [${subject}] (ID: ${res.data?.id})`);
+        return true;
+      }
+      console.warn('Resend returned note for admin email:', res.error);
+    } catch (resendErr) {
+      console.warn('Resend exception for admin email, trying SMTP fallback:', resendErr);
     }
-    console.log(`✅ Admin email sent successfully to ${to} [${subject}]`);
+  }
+
+  // 2. Try SendGrid if configured
+  if (provider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
+    try {
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      await sgMail.send({ to, from: process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM, subject, html });
+      console.log(`✅ Admin email sent via SendGrid to ${to}`);
+      return true;
+    } catch (sgErr) {
+      console.warn('SendGrid exception:', sgErr);
+    }
+  }
+
+  // 3. Robust Nodemailer SMTP fallback
+  try {
+    const transporter = createSmtpTransporter();
+    const from = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
+    await transporter.sendMail({ from: `"Sparkles & Smiles Orders" <${from}>`, to, subject, html });
+    console.log(`✅ Admin email sent successfully via SMTP to ${to} [${subject}]`);
     return true;
   } catch (e) {
-    console.error('❌ Failed to send admin email:', e);
+    console.error('❌ Failed to send admin email via all providers:', e);
     return false;
   }
 }
@@ -67,23 +89,45 @@ export async function sendCustomerEmail(toEmail: string, subject: string, html: 
   }
 
   const provider = process.env.EMAIL_PROVIDER || DEFAULT_EMAIL_PROVIDER;
-  const from = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
+  const resendKey = process.env.RESEND_API_KEY || '';
 
-  try {
-    if (provider === 'resend' && process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({ from, to: toEmail, subject, html });
-    } else if (provider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      await sgMail.send({ to: toEmail, from, subject, html });
-    } else {
-      const transporter = createSmtpTransporter();
-      await transporter.sendMail({ from: `"${BUSINESS_CONFIG.name} Bookings" <${from}>`, to: toEmail, subject, html });
+  // 1. Try Resend if configured
+  if (provider === 'resend' || resendKey) {
+    try {
+      const resend = new Resend(resendKey);
+      const resendFrom = process.env.RESEND_FROM || 'Fireworks Store <onboarding@resend.dev>';
+      const res = await resend.emails.send({ from: resendFrom, to: toEmail, subject, html });
+      if (!res.error) {
+        console.log(`✅ Customer confirmation email sent successfully via Resend to ${toEmail} [${subject}] (ID: ${res.data?.id})`);
+        return true;
+      }
+      console.warn('Resend note for customer email:', res.error);
+    } catch (resendErr) {
+      console.warn('Resend exception for customer email, trying SMTP fallback:', resendErr);
     }
-    console.log(`✅ Customer confirmation email sent successfully to ${toEmail} [${subject}]`);
+  }
+
+  // 2. Try SendGrid if configured
+  if (provider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
+    try {
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      await sgMail.send({ to: toEmail, from: process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM, subject, html });
+      console.log(`✅ Customer email sent via SendGrid to ${toEmail}`);
+      return true;
+    } catch (sgErr) {
+      console.warn('SendGrid customer exception:', sgErr);
+    }
+  }
+
+  // 3. Robust Nodemailer SMTP fallback
+  try {
+    const transporter = createSmtpTransporter();
+    const from = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
+    await transporter.sendMail({ from: `"${BUSINESS_CONFIG.name} Bookings" <${from}>`, to: toEmail, subject, html });
+    console.log(`✅ Customer confirmation email sent successfully via SMTP to ${toEmail} [${subject}]`);
     return true;
   } catch (e) {
-    console.error('❌ Failed to send customer confirmation email:', e);
+    console.error('❌ Failed to send customer confirmation email via all providers:', e);
     return false;
   }
 }
