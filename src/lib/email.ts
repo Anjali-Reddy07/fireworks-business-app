@@ -101,7 +101,34 @@ export async function sendCustomerEmail(toEmail: string, subject: string, html: 
         console.log(`✅ Customer confirmation email sent successfully via Resend to ${toEmail} [${subject}] (ID: ${res.data?.id})`);
         return true;
       }
+
       console.warn('Resend note for customer email:', res.error);
+
+      // Handle Resend Sandbox restriction: if domain is not yet verified, Resend only permits sending to the account owner.
+      // Route the customer copy with a clear notification banner so no customer confirmation is lost during testing.
+      if (res.error?.message?.includes('You can only send testing emails to your own email address')) {
+        const adminFallback = process.env.EMAIL_TO || DEFAULT_EMAIL_TO;
+        console.warn(`[Resend Sandbox Limitation]: Routing customer confirmation for ${toEmail} to verified account ${adminFallback}`);
+        const fallbackRes = await resend.emails.send({
+          from: resendFrom,
+          to: adminFallback,
+          subject: `[Customer Copy: ${toEmail}] ${subject}`,
+          html: `
+            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; padding: 14px 16px; margin-bottom: 24px; font-family: sans-serif; font-size: 13px; color: #1e3a8a; border-radius: 8px;">
+              <strong style="color: #1d4ed8; font-size: 14px; display: block; margin-bottom: 4px;">📧 Customer Confirmation Copy</strong>
+              This customer order confirmation was generated for <strong>${toEmail}</strong>.<br />
+              <span style="color: #475569; font-size: 12px; margin-top: 4px; display: block;">
+                <em>Notice: In Resend Free Sandbox mode (<code>onboarding@resend.dev</code>), emails to external recipient domains are routed to your verified account (<code>${adminFallback}</code>). To deliver directly to any customer's inbox, verify your custom domain at <a href="https://resend.com/domains" style="color: #2563eb; font-weight: bold; text-decoration: underline;" target="_blank">resend.com/domains</a>.</em>
+              </span>
+            </div>
+            ${html}
+          `,
+        });
+        if (!fallbackRes.error) {
+          console.log(`✅ Customer confirmation preview delivered to admin inbox (${adminFallback}) for customer ${toEmail}`);
+          return true;
+        }
+      }
     } catch (resendErr) {
       console.warn('Resend exception for customer email, trying SMTP fallback:', resendErr);
     }
